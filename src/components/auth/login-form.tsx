@@ -1,45 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DEMO_USERS } from "@/lib/constants";
+import { loginAction, type LoginState } from "@/app/(auth)/login/actions";
 
-export function LoginForm() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+const initialState: LoginState = {};
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-    setLoading(false);
-
-    if (!res.ok) {
-      setError(data.error || "Login failed");
-      return;
-    }
-
-    router.push(data.redirect);
-    router.refresh();
-  }
+export function LoginForm({ from }: { from?: string }) {
+  const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   function fillDemo(demoEmail: string, demoPassword: string) {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
+    const emailInput = document.getElementById("login-email") as HTMLInputElement | null;
+    const passwordInput = document.getElementById("login-password") as HTMLInputElement | null;
+    if (emailInput) emailInput.value = demoEmail;
+    if (passwordInput) passwordInput.value = demoPassword;
   }
 
   return (
@@ -52,29 +29,36 @@ export function LoginForm() {
         <p className="text-sm text-slate-500 mt-1">Enter your credentials to access your portal</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form action={formAction} className="space-y-4">
+        {from ? <input type="hidden" name="from" value={from} /> : null}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Email address</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="login-email">
+            Email address
+          </label>
           <Input
+            id="login-email"
+            name="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            defaultValue=""
             placeholder="you@company.com"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="login-password">
+            Password
+          </label>
           <Input
+            id="login-password"
+            name="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            defaultValue=""
             required
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing in…" : "Sign in"}
+        {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Signing in…" : "Sign in"}
         </Button>
       </form>
 

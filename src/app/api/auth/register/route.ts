@@ -1,7 +1,9 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createAdminClient, createAuthRouteClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { createAdminClient } from "@/lib/supabase/server";
 import { roleDashboardPath } from "@/lib/auth";
-import { newId, nowIso } from "@/lib/id";
+import { nowIso } from "@/lib/id";
 import type { Role } from "@/lib/types";
 import { z } from "zod";
 
@@ -30,9 +32,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
 
+    const cookieStore = await cookies();
+    const authCookies: { name: string; value: string; options?: Parameters<typeof cookieStore.set>[2] }[] =
+      [];
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+              authCookies.push({ name, value, options });
+            });
+          },
+        },
+      }
+    );
+
+    const { data: signUpData, error: authError } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          role: "CLIENT",
+          language: data.language,
+          country: data.country ?? null,
+        },
+      },
+    });
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 400 });
+    }
+
+    const authUserId = signUpData.user?.id;
+    if (!authUserId) {
+      return NextResponse.json(
+        { error: "Check your email to confirm your account before signing in." },
+        { status: 400 }
+      );
+    }
+
     const now = nowIso();
     const user = {
-      id: newId(),
+      id: authUserId,
       email: data.email,
       passwordHash: null,
       name: data.name,
@@ -44,15 +92,6 @@ export async function POST(request: Request) {
       createdAt: now,
       updatedAt: now,
     };
-
-    const authClient = await createAuthRouteClient();
-    const { error: authError } = await authClient.auth.signUp({
-      email: data.email,
-      password: data.password,
-    });
-    if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 400 });
-    }
 
     const { error } = await admin.from("User").insert(user);
     if (error) {
@@ -68,10 +107,14 @@ export async function POST(request: Request) {
       country: user.country,
     };
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: sessionUser,
       redirect: roleDashboardPath(user.role),
     });
+    authCookies.forEach(({ name, value, options }) => {
+      response.cookies.set(name, value, options);
+    });
+    return response;
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }

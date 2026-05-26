@@ -10,6 +10,26 @@ export type SessionUser = {
   country: string | null;
 };
 
+const userSelect = "id, email, name, role, language, country";
+
+function sessionFromRow(row: {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  language: string;
+  country: string | null;
+}): SessionUser {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    role: row.role as Role,
+    language: row.language,
+    country: row.country,
+  };
+}
+
 export async function getSession(): Promise<SessionUser | null> {
   const authClient = await createAuthServerClient();
   const {
@@ -18,21 +38,34 @@ export async function getSession(): Promise<SessionUser | null> {
 
   if (!authUser?.email) return null;
 
-  const { data: appUser } = await createAdminClient()
+  const admin = createAdminClient();
+
+  const { data: byId } = await admin
     .from("User")
-    .select("id, email, name, role, language, country")
+    .select(userSelect)
+    .eq("id", authUser.id)
+    .maybeSingle();
+
+  if (byId) return sessionFromRow(byId);
+
+  const { data: byEmail } = await admin
+    .from("User")
+    .select(userSelect)
     .eq("email", authUser.email)
     .maybeSingle();
 
-  if (!appUser) return null;
+  if (byEmail) return sessionFromRow(byEmail);
+
+  const meta = authUser.user_metadata ?? {};
+  const role = (meta.role as Role) || "CLIENT";
 
   return {
-    id: appUser.id,
-    email: appUser.email,
-    name: appUser.name,
-    role: appUser.role as Role,
-    language: appUser.language,
-    country: appUser.country,
+    id: authUser.id,
+    email: authUser.email,
+    name: (meta.name as string) || authUser.email,
+    role,
+    language: (meta.language as string) || "en",
+    country: (meta.country as string) ?? null,
   };
 }
 

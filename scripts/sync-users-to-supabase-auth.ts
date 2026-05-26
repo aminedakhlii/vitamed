@@ -25,7 +25,9 @@ const supabase = createClient(url, serviceKey, {
 });
 
 async function main() {
-  const { data: users, error } = await supabase.from("User").select("id,email,name");
+  const { data: users, error } = await supabase
+    .from("User")
+    .select("id,email,name,role,language,country");
   if (error) throw error;
 
   let created = 0;
@@ -49,7 +51,12 @@ async function main() {
       email: user.email,
       password: defaultPassword,
       email_confirm: true,
-      user_metadata: { name: user.name },
+      user_metadata: {
+        name: user.name,
+        role: user.role,
+        language: user.language,
+        country: user.country,
+      },
     });
 
     if (createError) {
