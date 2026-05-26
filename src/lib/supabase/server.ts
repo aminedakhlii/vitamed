@@ -3,6 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv, supabaseCookieDefaults } from "./env";
 
+const serverClientOptions = {
+  cookieEncoding: "base64url" as const,
+  cookieOptions: supabaseCookieDefaults,
+};
+
 export function createAdminClient() {
   const { url, serviceRoleKey } = getSupabaseEnv();
   if (!serviceRoleKey) {
@@ -21,7 +26,7 @@ export async function createAuthServerClient() {
   const cookieStore = await cookies();
 
   return createServerClient(url, anonKey, {
-    cookieOptions: supabaseCookieDefaults,
+    ...serverClientOptions,
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -44,7 +49,7 @@ export async function createAuthRouteClient() {
   const cookieStore = await cookies();
 
   return createServerClient(url, anonKey, {
-    cookieOptions: supabaseCookieDefaults,
+    ...serverClientOptions,
     cookies: {
       getAll() {
         return cookieStore.getAll();

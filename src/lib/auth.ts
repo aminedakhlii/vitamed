@@ -1,5 +1,6 @@
 import { createAdminClient, createAuthServerClient } from "./supabase/server";
 import type { NotificationType, Role } from "./types";
+import type { User } from "@supabase/supabase-js";
 
 export type SessionUser = {
   id: string;
@@ -30,14 +31,7 @@ function sessionFromRow(row: {
   };
 }
 
-export async function getSession(): Promise<SessionUser | null> {
-  const authClient = await createAuthServerClient();
-  const {
-    data: { user: authUser },
-  } = await authClient.auth.getUser();
-
-  if (!authUser?.email) return null;
-
+async function profileForAuthUser(authUser: User): Promise<SessionUser | null> {
   const admin = createAdminClient();
 
   const { data: byId } = await admin
@@ -51,7 +45,7 @@ export async function getSession(): Promise<SessionUser | null> {
   const { data: byEmail } = await admin
     .from("User")
     .select(userSelect)
-    .eq("email", authUser.email)
+    .eq("email", authUser.email!)
     .maybeSingle();
 
   if (byEmail) return sessionFromRow(byEmail);
@@ -61,12 +55,34 @@ export async function getSession(): Promise<SessionUser | null> {
 
   return {
     id: authUser.id,
-    email: authUser.email,
-    name: (meta.name as string) || authUser.email,
+    email: authUser.email!,
+    name: (meta.name as string) || authUser.email!,
     role,
     language: (meta.language as string) || "en",
     country: (meta.country as string) ?? null,
   };
+}
+
+export async function getSession(): Promise<SessionUser | null> {
+  const authClient = await createAuthServerClient();
+
+  // Read cookie session first (no network). After a backgrounded tab the access
+  // token may be expired while the refresh token is still valid in the cookie.
+  const {
+    data: { session },
+  } = await authClient.auth.getSession();
+
+  if (session?.user?.email) {
+    return profileForAuthUser(session.user);
+  }
+
+  const {
+    data: { user: authUser },
+  } = await authClient.auth.getUser();
+
+  if (!authUser?.email) return null;
+
+  return profileForAuthUser(authUser);
 }
 
 export async function requireSession(roles?: Role[]) {

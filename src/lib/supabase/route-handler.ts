@@ -23,6 +23,7 @@ export function createSupabaseRouteHandlerClient(
   const { url, anonKey } = getSupabaseEnv();
 
   return createServerClient(url, anonKey, {
+    cookieEncoding: "base64url",
     cookieOptions: supabaseCookieDefaults,
     cookies: {
       getAll() {

@@ -1,13 +1,23 @@
+import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "./sidebar";
+import { SupabaseAuthListener } from "@/components/supabase-auth-listener";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (!session) redirect("/login");
+  if (!session) {
+    const headersList = await headers();
+    const pathname = headersList.get("x-pathname");
+    if (pathname) {
+      redirect(`/login?from=${encodeURIComponent(pathname)}`);
+    }
+    redirect("/login");
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">
+      <SupabaseAuthListener />
       <Sidebar role={session.role} userName={session.name} />
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">

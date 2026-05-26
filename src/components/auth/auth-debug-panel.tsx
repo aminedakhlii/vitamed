@@ -6,19 +6,23 @@ import { createAdminClient, createAuthServerClient } from "@/lib/supabase/server
 export async function AuthDebugPanel({ from }: { from?: string }) {
   const env = getSupabaseEnvDiagnostics();
   const cookieStore = await cookies();
-  const authCookieNames = cookieStore
-    .getAll()
-    .map((c) => c.name)
-    .filter((n) => n.includes("sb-") || n.includes("supabase"));
+  const authCookies = cookieStore.getAll().filter((c) => c.name.includes("sb-"));
 
   let authUserEmail: string | null = null;
   let authErrorMessage: string | null = null;
   let sessionRole: string | null = null;
   let dbRole: string | null = null;
+  let cookieSessionEmail: string | null = null;
 
   if (env.configured) {
     try {
       const authClient = await createAuthServerClient();
+
+      const {
+        data: { session: cookieSession },
+      } = await authClient.auth.getSession();
+      cookieSessionEmail = cookieSession?.user?.email ?? null;
+
       const {
         data: { user: authUser },
         error: authError,
@@ -34,6 +38,13 @@ export async function AuthDebugPanel({ from }: { from?: string }) {
           .from("User")
           .select("role")
           .eq("email", authUser.email)
+          .maybeSingle();
+        dbRole = data?.role ?? null;
+      } else if (cookieSession?.user?.email && env.hasServiceRoleKey) {
+        const { data } = await createAdminClient()
+          .from("User")
+          .select("role")
+          .eq("email", cookieSession.user.email)
           .maybeSingle();
         dbRole = data?.role ?? null;
       }
@@ -52,41 +63,40 @@ export async function AuthDebugPanel({ from }: { from?: string }) {
         {env.onVercel ? `Vercel (${env.vercelEnv ?? "unknown"})` : "local"} / {env.nodeEnv}
       </p>
       <p>
-        <span className="text-amber-700">Supabase project:</span>{" "}
-        {env.projectRef ?? "MISSING — set NEXT_PUBLIC_SUPABASE_URL on Vercel"}
+        <span className="text-amber-700">Supabase project:</span> {env.projectRef ?? "MISSING"}
       </p>
       <p>
-        <span className="text-amber-700">Env vars:</span> URL={env.hasUrl ? "ok" : "MISSING"},
-        anon={env.hasAnonKey ? "ok" : "MISSING"}, service=
-        {env.hasServiceRoleKey ? "ok" : "MISSING"}
+        <span className="text-amber-700">Cookie session (local read):</span>{" "}
+        {cookieSessionEmail ?? "none"}
       </p>
       <p>
-        <span className="text-amber-700">Supabase user:</span> {authUserEmail ?? "none"}
+        <span className="text-amber-700">Supabase user (getUser):</span> {authUserEmail ?? "none"}
         {authErrorMessage ? ` (${authErrorMessage})` : ""}
       </p>
       <p>
         <span className="text-amber-700">App session role:</span> {sessionRole ?? "none"}
       </p>
       <p>
-        <span className="text-amber-700">DB role (by email):</span> {dbRole ?? "none"}
+        <span className="text-amber-700">DB role:</span> {dbRole ?? "none"}
       </p>
       <p>
         <span className="text-amber-700">Return URL (from):</span> {from ?? "none"}
       </p>
       <p>
-        <span className="text-amber-700">Auth cookies in browser:</span>{" "}
-        {authCookieNames.length ? authCookieNames.join(", ") : "none"}
+        <span className="text-amber-700">Auth cookies:</span>{" "}
+        {authCookies.length
+          ? authCookies.map((c) => `${c.name} (${c.value.length} chars)`).join(", ")
+          : "none"}
       </p>
-      {!env.configured ? (
-        <p className="text-red-700 font-medium pt-1">
-          .env is not deployed to Vercel. Copy all Supabase keys from .env into Vercel → Settings →
-          Environment Variables (Production + Preview), then Redeploy.
+      {cookieSessionEmail && !authUserEmail ? (
+        <p className="text-red-700 pt-1">
+          Cookie session exists but getUser failed — usually an expired access token after a
+          background tab. The auth listener should refresh on tab focus after this deploy.
         </p>
       ) : null}
-      {env.configured && authCookieNames.length === 0 ? (
+      {authCookies.length > 0 && !cookieSessionEmail ? (
         <p className="text-red-700 pt-1">
-          No auth cookies reached the server. After sign-in, if this stays empty, login cookies are
-          not being set or were cleared — check Vercel logs for [auth:login] cookieCount.
+          Auth cookie present but unreadable (corrupted chunks). Sign out and sign in again.
         </p>
       ) : null}
     </div>

@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient as createSupabaseBrowserClient } from "@supabase/ssr";
+import { supabaseCookieDefaults } from "./env";
 
 export function createBrowserClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -6,5 +7,9 @@ export function createBrowserClient() {
   if (!url || !key) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
   }
-  return createClient(url, key);
+
+  return createSupabaseBrowserClient(url, key, {
+    cookieEncoding: "base64url",
+    cookieOptions: supabaseCookieDefaults,
+  });
 }

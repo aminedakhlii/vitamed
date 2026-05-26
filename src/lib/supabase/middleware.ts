@@ -36,6 +36,12 @@ function copyCookies(from: NextResponse, to: NextResponse) {
   });
 }
 
+function requestHeadersWithPathname(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return requestHeaders;
+}
+
 export async function updateSession(request: NextRequest) {
   const envDiag = getSupabaseEnvDiagnostics();
   if (!envDiag.configured) {
@@ -43,12 +49,15 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeadersWithPathname(request) },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!.trim(),
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!.trim(),
     {
+      cookieEncoding: "base64url",
       cookieOptions: supabaseCookieDefaults,
       cookies: {
         getAll() {
@@ -58,7 +67,10 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({
+            request: { headers: requestHeadersWithPathname(request) },
+          });
+          supabaseResponse.headers.set("x-pathname", request.nextUrl.pathname);
           cookiesToSet.forEach(({ name, value, options }) => {
             supabaseResponse.cookies.set(name, value, options);
           });
@@ -80,24 +92,33 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = authPaths.includes(pathname);
 
   const {
-    data: { user },
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const {
+    data: { user: validatedUser },
     error: authError,
   } = await supabase.auth.getUser();
 
+  const user = validatedUser ?? session?.user ?? null;
+
   const role = user?.email ? await getUserRole(user.email) : null;
+
+  const incomingAuthCookies = request.cookies
+    .getAll()
+    .filter((c) => c.name.includes("sb-"));
 
   console.log("[auth:middleware]", {
     pathname,
     hasUser: !!user,
+    hasValidatedUser: !!validatedUser,
+    hasSessionOnly: !validatedUser && !!session?.user,
     email: user?.email ?? null,
     role,
     authError: authError?.message ?? null,
     from: request.nextUrl.searchParams.get("from"),
-    env: envDiag,
-    incomingAuthCookies: request.cookies
-      .getAll()
-      .map((c) => c.name)
-      .filter((n) => n.includes("sb-")),
+    authCookieCount: incomingAuthCookies.length,
+    authCookieNames: incomingAuthCookies.map((c) => c.name),
   });
 
   if (user && isAuthPage) {
@@ -124,8 +145,6 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublic) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
-    // Do NOT copy middleware cookies here — failed getUser() may emit cookie clears
-    // that would wipe a valid session set by /api/auth/login on the previous response.
     return NextResponse.redirect(loginUrl);
   }
 
