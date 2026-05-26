@@ -1,80 +1,70 @@
 import { cookies } from "next/headers";
-import { getSession } from "@/lib/auth";
 import { getSupabaseEnvDiagnostics } from "@/lib/supabase/env";
-import { createAdminClient, createAuthServerClient } from "@/lib/supabase/server";
+import { createAuthServerClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export async function AuthDebugPanel({ from }: { from?: string }) {
   const env = getSupabaseEnvDiagnostics();
   const cookieStore = await cookies();
-  const authCookies = cookieStore.getAll().filter((c) => c.name.includes("sb-"));
+  const sbCookies = cookieStore
+    .getAll()
+    .filter((c) => c.name.includes("sb-"))
+    .map((c) => ({ name: c.name, len: c.value.length }));
 
-  let authUserEmail: string | null = null;
-  let authErrorMessage: string | null = null;
-  let sessionRole: string | null = null;
-  let dbRole: string | null = null;
   let cookieSessionEmail: string | null = null;
+  let getSessionError: string | null = null;
+  let dbRole: string | null = null;
 
   if (env.configured) {
     try {
-      const authClient = await createAuthServerClient();
+      const client = await createAuthServerClient();
 
-      const {
-        data: { session: cookieSession },
-      } = await authClient.auth.getSession();
-      cookieSessionEmail = cookieSession?.user?.email ?? null;
+      const { data: sessionData, error: sessionError } =
+        await client.auth.getSession();
 
-      const {
-        data: { user: authUser },
-        error: authError,
-      } = await authClient.auth.getUser();
-      authUserEmail = authUser?.email ?? null;
-      authErrorMessage = authError?.message ?? null;
+      if (sessionError) {
+        getSessionError = sessionError.message;
+      } else {
+        cookieSessionEmail = sessionData.session?.user?.email ?? null;
+      }
 
-      const session = await getSession();
-      sessionRole = session?.role ?? null;
-
-      if (authUser?.email && env.hasServiceRoleKey) {
+      if (cookieSessionEmail && env.hasServiceRoleKey) {
         const { data } = await createAdminClient()
           .from("User")
           .select("role")
-          .eq("email", authUser.email)
-          .maybeSingle();
-        dbRole = data?.role ?? null;
-      } else if (cookieSession?.user?.email && env.hasServiceRoleKey) {
-        const { data } = await createAdminClient()
-          .from("User")
-          .select("role")
-          .eq("email", cookieSession.user.email)
+          .eq("email", cookieSessionEmail)
           .maybeSingle();
         dbRole = data?.role ?? null;
       }
     } catch (e) {
-      authErrorMessage = e instanceof Error ? e.message : "Unknown auth error";
+      getSessionError = e instanceof Error ? e.message : "Unknown error";
     }
-  } else {
-    authErrorMessage = "Supabase env vars missing on this server";
   }
 
   return (
     <div className="mt-4 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950 space-y-1">
-      <p className="font-semibold">Session debug</p>
+      <p className="font-semibold text-amber-900">Session debug (server-side)</p>
       <p>
         <span className="text-amber-700">Deployment:</span>{" "}
-        {env.onVercel ? `Vercel (${env.vercelEnv ?? "unknown"})` : "local"} / {env.nodeEnv}
+        {env.onVercel ? `Vercel (${env.vercelEnv})` : "local"} / {env.nodeEnv}
       </p>
       <p>
-        <span className="text-amber-700">Supabase project:</span> {env.projectRef ?? "MISSING"}
+        <span className="text-amber-700">Supabase project:</span>{" "}
+        {env.projectRef ?? <span className="text-red-600 font-bold">MISSING</span>}
       </p>
       <p>
-        <span className="text-amber-700">Cookie session (local read):</span>{" "}
-        {cookieSessionEmail ?? "none"}
+        <span className="text-amber-700">Env vars:</span> URL=
+        {env.hasUrl ? "ok" : <span className="text-red-600">MISSING</span>}, anon=
+        {env.hasAnonKey ? "ok" : <span className="text-red-600">MISSING</span>}, service=
+        {env.hasServiceRoleKey ? "ok" : <span className="text-red-600">MISSING</span>}
       </p>
       <p>
-        <span className="text-amber-700">Supabase user (getUser):</span> {authUserEmail ?? "none"}
-        {authErrorMessage ? ` (${authErrorMessage})` : ""}
-      </p>
-      <p>
-        <span className="text-amber-700">App session role:</span> {sessionRole ?? "none"}
+        <span className="text-amber-700">Cookie session email:</span>{" "}
+        {cookieSessionEmail ?? (
+          <span className="text-red-600">
+            none{getSessionError ? ` (${getSessionError})` : ""}
+          </span>
+        )}
       </p>
       <p>
         <span className="text-amber-700">DB role:</span> {dbRole ?? "none"}
@@ -84,19 +74,15 @@ export async function AuthDebugPanel({ from }: { from?: string }) {
       </p>
       <p>
         <span className="text-amber-700">Auth cookies:</span>{" "}
-        {authCookies.length
-          ? authCookies.map((c) => `${c.name} (${c.value.length} chars)`).join(", ")
-          : "none"}
+        {sbCookies.length
+          ? sbCookies.map((c) => `${c.name} (${c.len}b)`).join(", ")
+          : <span className="text-red-600">none — cookies not set, login will fail</span>}
       </p>
-      {cookieSessionEmail && !authUserEmail ? (
-        <p className="text-red-700 pt-1">
-          Cookie session exists but getUser failed — usually an expired access token after a
-          background tab. The auth listener should refresh on tab focus after this deploy.
-        </p>
-      ) : null}
-      {authCookies.length > 0 && !cookieSessionEmail ? (
-        <p className="text-red-700 pt-1">
-          Auth cookie present but unreadable (corrupted chunks). Sign out and sign in again.
+      {sbCookies.length > 0 && !cookieSessionEmail ? (
+        <p className="mt-1 text-red-700 font-medium">
+          Cookie present but cannot be decoded. This usually means the session
+          was set by a different Supabase project or is corrupted. Sign out and
+          sign in again to clear it.
         </p>
       ) : null}
     </div>

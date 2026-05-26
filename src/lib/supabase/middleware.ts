@@ -9,12 +9,10 @@ const publicPaths = ["/", "/login", "/register", "/forgot-password"];
 const authPaths = ["/login", "/register", "/forgot-password"];
 
 function createAdminForMiddleware() {
-  const diag = getSupabaseEnvDiagnostics();
-  if (!diag.configured || !diag.hasServiceRoleKey) return null;
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!.trim();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!.trim();
-  return createClient(url, key, {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url.trim(), key.trim(), {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
@@ -30,27 +28,24 @@ async function getUserRole(email: string): Promise<Role | null> {
   return (data?.role as Role) ?? null;
 }
 
-function copyCookies(from: NextResponse, to: NextResponse) {
+function copyRefreshCookies(from: NextResponse, to: NextResponse) {
   from.cookies.getAll().forEach(({ name, value, ...options }) => {
     to.cookies.set(name, value, options);
   });
 }
 
-function requestHeadersWithPathname(request: NextRequest) {
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
-  return requestHeaders;
-}
-
 export async function updateSession(request: NextRequest) {
   const envDiag = getSupabaseEnvDiagnostics();
   if (!envDiag.configured) {
-    console.error("[auth:middleware] Supabase env not configured on this deployment", envDiag);
+    console.error("[middleware] Supabase env missing", envDiag);
     return NextResponse.next({ request });
   }
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
   let supabaseResponse = NextResponse.next({
-    request: { headers: requestHeadersWithPathname(request) },
+    request: { headers: requestHeaders },
   });
 
   const supabase = createServerClient(
@@ -63,21 +58,19 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
+        // When the session is refreshed (access token rotated), write the new
+        // cookies to BOTH the ongoing request (so SSR sees them) and the response
+        // (so the browser stores them).
         setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
-          supabaseResponse = NextResponse.next({
-            request: { headers: requestHeadersWithPathname(request) },
-          });
-          supabaseResponse.headers.set("x-pathname", request.nextUrl.pathname);
-          cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options);
-          });
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          const updatedHeaders = new Headers(request.headers);
+          updatedHeaders.set("x-pathname", request.nextUrl.pathname);
+          supabaseResponse = NextResponse.next({ request: { headers: updatedHeaders } });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
           if (headers) {
-            Object.entries(headers).forEach(([key, value]) => {
-              supabaseResponse.headers.set(key, value);
-            });
+            Object.entries(headers).forEach(([k, v]) => supabaseResponse.headers.set(k, v));
           }
         },
       },
@@ -91,61 +84,49 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/auth/callback");
   const isAuthPage = authPaths.includes(pathname);
 
+  // ─── Read the session from cookies (no network round-trip) ─────────────────
+  // getSession() trusts the locally-stored JWT. This avoids Vercel network
+  // timeouts and race conditions between parallel RSC requests. Token rotation
+  // is handled client-side by SupabaseAuthListener.
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const {
-    data: { user: validatedUser },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  const user = validatedUser ?? session?.user ?? null;
-
+  const user = session?.user ?? null;
   const role = user?.email ? await getUserRole(user.email) : null;
 
-  const incomingAuthCookies = request.cookies
-    .getAll()
-    .filter((c) => c.name.includes("sb-"));
-
-  console.log("[auth:middleware]", {
+  console.log("[middleware]", {
     pathname,
     hasUser: !!user,
-    hasValidatedUser: !!validatedUser,
-    hasSessionOnly: !validatedUser && !!session?.user,
     email: user?.email ?? null,
     role,
-    authError: authError?.message ?? null,
-    from: request.nextUrl.searchParams.get("from"),
-    authCookieCount: incomingAuthCookies.length,
-    authCookieNames: incomingAuthCookies.map((c) => c.name),
+    sbCookies: request.cookies
+      .getAll()
+      .filter((c) => c.name.includes("sb-"))
+      .map((c) => c.name),
   });
 
   if (user && isAuthPage) {
     const from = request.nextUrl.searchParams.get("from");
-    const destination = safeRedirectPath(from, roleDashboardPath(role ?? "CLIENT"));
-    const redirect = NextResponse.redirect(new URL(destination, request.url));
-    copyCookies(supabaseResponse, redirect);
+    const dest = safeRedirectPath(from, roleDashboardPath(role ?? "CLIENT"));
+    const redirect = NextResponse.redirect(new URL(dest, request.url));
+    copyRefreshCookies(supabaseResponse, redirect);
     return redirect;
   }
 
-  if (user && pathname.startsWith("/dashboard/admin")) {
-    if (role && role !== "ADMIN") {
-      const redirect = NextResponse.redirect(
-        new URL(roleDashboardPath(role), request.url)
-      );
-      copyCookies(supabaseResponse, redirect);
-      return redirect;
-    }
-    if (role === null) {
-      console.warn("[auth:middleware] ADMIN route but no DB role for", user.email);
-    }
+  if (user && pathname.startsWith("/dashboard/admin") && role && role !== "ADMIN") {
+    const redirect = NextResponse.redirect(new URL(roleDashboardPath(role), request.url));
+    copyRefreshCookies(supabaseResponse, redirect);
+    return redirect;
   }
 
   if (!user && !isPublic) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+    // Don't copy supabaseResponse cookies here — getSession() might emit
+    // clear-cookie calls that would wipe a valid session.
+    return redirect;
   }
 
   return supabaseResponse;

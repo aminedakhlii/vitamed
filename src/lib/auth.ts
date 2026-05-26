@@ -42,22 +42,23 @@ async function profileForAuthUser(authUser: User): Promise<SessionUser | null> {
 
   if (byId) return sessionFromRow(byId);
 
-  const { data: byEmail } = await admin
-    .from("User")
-    .select(userSelect)
-    .eq("email", authUser.email!)
-    .maybeSingle();
+  if (authUser.email) {
+    const { data: byEmail } = await admin
+      .from("User")
+      .select(userSelect)
+      .eq("email", authUser.email)
+      .maybeSingle();
 
-  if (byEmail) return sessionFromRow(byEmail);
+    if (byEmail) return sessionFromRow(byEmail);
+  }
 
+  // Auth user exists but no profile row — use metadata
   const meta = authUser.user_metadata ?? {};
-  const role = (meta.role as Role) || "CLIENT";
-
   return {
     id: authUser.id,
-    email: authUser.email!,
-    name: (meta.name as string) || authUser.email!,
-    role,
+    email: authUser.email ?? "",
+    name: (meta.name as string) || authUser.email || "Unknown",
+    role: (meta.role as Role) || "CLIENT",
     language: (meta.language as string) || "en",
     country: (meta.country as string) ?? null,
   };
@@ -66,23 +67,26 @@ async function profileForAuthUser(authUser: User): Promise<SessionUser | null> {
 export async function getSession(): Promise<SessionUser | null> {
   const authClient = await createAuthServerClient();
 
-  // Read cookie session first (no network). After a backgrounded tab the access
-  // token may be expired while the refresh token is still valid in the cookie.
+  // Primary: read from cookie without a network call.
+  // This works even when the access token is close to expiry — the browser
+  // client (SupabaseAuthListener) will rotate it proactively.
   const {
     data: { session },
   } = await authClient.auth.getSession();
 
-  if (session?.user?.email) {
+  if (session?.user) {
     return profileForAuthUser(session.user);
   }
 
+  // Fallback: validate with Supabase (this does a network call and can rotate
+  // the access token when running in route handlers / server actions).
   const {
-    data: { user: authUser },
+    data: { user },
   } = await authClient.auth.getUser();
 
-  if (!authUser?.email) return null;
+  if (!user) return null;
 
-  return profileForAuthUser(authUser);
+  return profileForAuthUser(user);
 }
 
 export async function requireSession(roles?: Role[]) {
