@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
+import { createBrowserClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
   Package,
@@ -59,7 +60,14 @@ const navByRole: Record<Role, NavItem[]> = {
 
 export function Sidebar({ role, userName }: { role: Role; userName: string }) {
   const pathname = usePathname();
+  const router = useRouter();
   const items = navByRole[role];
+
+  async function handleSignOut() {
+    const supabase = createBrowserClient();
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  }
 
   return (
     <aside className="w-64 min-h-screen bg-[#1e3a5f] text-white flex flex-col shrink-0">
@@ -114,13 +122,14 @@ export function Sidebar({ role, userName }: { role: Role; userName: string }) {
       <div className="px-4 py-4 border-t border-white/10">
         <p className="text-xs text-white/50 mb-1">Signed in as</p>
         <p className="text-sm font-medium truncate">{userName}</p>
-        <Link
-          href="/api/auth/logout"
+        <button
+          type="button"
+          onClick={handleSignOut}
           className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors mt-3"
         >
           <LogOut className="w-3.5 h-3.5" />
           Sign out
-        </Link>
+        </button>
       </div>
     </aside>
   );
