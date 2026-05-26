@@ -28,6 +28,43 @@ const TABLES_IN_ORDER = [
   "FollowUp",
 ] as const;
 
+const BOOLEAN_FIELDS = new Set(["active", "read", "completed", "automated"]);
+const TIMESTAMP_FIELDS = new Set([
+  "createdAt",
+  "updatedAt",
+  "estimatedDelivery",
+  "scheduledAt",
+]);
+
+function normalizeTimestamp(value: unknown): unknown {
+  if (value === null || value === undefined || value === "") return null;
+
+  if (typeof value === "number") {
+    // SQLite exports can contain epoch ms/sec numbers.
+    const ms = value > 1e12 ? value : value > 1e9 ? value * 1000 : NaN;
+    if (!Number.isNaN(ms)) return new Date(ms).toISOString();
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    // Handle numeric timestamps serialized as strings, e.g. "1779428259236"
+    if (/^\d+$/.test(trimmed)) {
+      const n = Number(trimmed);
+      const ms = n > 1e12 ? n : n > 1e9 ? n * 1000 : NaN;
+      if (!Number.isNaN(ms)) return new Date(ms).toISOString();
+    }
+
+    // Keep valid date/time strings, normalize to ISO for Postgres.
+    const parsed = Date.parse(trimmed);
+    if (!Number.isNaN(parsed)) return new Date(parsed).toISOString();
+  }
+
+  return value;
+}
+
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -43,7 +80,9 @@ function rowToRecord(row: Record<string, unknown>) {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(row)) {
     if (v === undefined) continue;
-    if (typeof v === "number" && (k === "active" || k === "read" || k === "completed" || k === "automated")) {
+    if (TIMESTAMP_FIELDS.has(k)) {
+      out[k] = normalizeTimestamp(v);
+    } else if (typeof v === "number" && BOOLEAN_FIELDS.has(k)) {
       out[k] = Boolean(v);
     } else {
       out[k] = v;

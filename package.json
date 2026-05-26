@@ -9,9 +9,11 @@
     "lint": "eslint",
     "db:migrate-to-supabase": "npx tsx scripts/migrate-sqlite-to-supabase.ts",
     "db:parse-catalog": ".venv/bin/python3 scripts/parse-vitaimed-catalog.py",
-    "db:import-vitaimed": "npx tsx scripts/import-vitaimed-supabase.ts"
+    "db:import-vitaimed": "npx tsx scripts/import-vitaimed-supabase.ts",
+    "db:sync-auth-users": "npx tsx scripts/sync-users-to-supabase-auth.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.49.8",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",

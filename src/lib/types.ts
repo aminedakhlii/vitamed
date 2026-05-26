@@ -27,7 +27,7 @@ export type NotificationType =
 export type User = {
   id: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   name: string;
   role: Role;
   language: string;

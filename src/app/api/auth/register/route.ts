@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/db";
-import { createSession, hashPassword, roleDashboardPath } from "@/lib/auth";
+import { createAdminClient, createAuthRouteClient } from "@/lib/supabase/server";
+import { roleDashboardPath } from "@/lib/auth";
 import { newId, nowIso } from "@/lib/id";
 import type { Role } from "@/lib/types";
 import { z } from "zod";
@@ -19,7 +19,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = schema.parse(body);
 
-    const { data: existing } = await getSupabase()
+    const admin = createAdminClient();
+    const { data: existing } = await admin
       .from("User")
       .select("id")
       .eq("email", data.email)
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     const user = {
       id: newId(),
       email: data.email,
-      passwordHash: await hashPassword(data.password),
+      passwordHash: null,
       name: data.name,
       role: "CLIENT" as Role,
       company: data.company ?? null,
@@ -44,7 +45,16 @@ export async function POST(request: Request) {
       updatedAt: now,
     };
 
-    const { error } = await getSupabase().from("User").insert(user);
+    const authClient = await createAuthRouteClient();
+    const { error: authError } = await authClient.auth.signUp({
+      email: data.email,
+      password: data.password,
+    });
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 400 });
+    }
+
+    const { error } = await admin.from("User").insert(user);
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
@@ -57,8 +67,6 @@ export async function POST(request: Request) {
       language: user.language,
       country: user.country,
     };
-
-    await createSession(sessionUser);
 
     return NextResponse.json({
       user: sessionUser,

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { destroySession } from "@/lib/auth";
+import { createAuthRouteClient } from "@/lib/supabase/server";
 
 async function logout() {
-  await destroySession();
+  const authClient = await createAuthRouteClient();
+  await authClient.auth.signOut();
   return NextResponse.redirect(new URL("/login", "http://localhost:3000"));
 }
 

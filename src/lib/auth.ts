@@ -1,14 +1,5 @@
-import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
-import bcrypt from "bcryptjs";
-import { getSupabase } from "./db";
+import { createAdminClient, createAuthServerClient } from "./supabase/server";
 import type { NotificationType, Role } from "./types";
-
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "charles-platform-dev-secret"
-);
-
-export const COOKIE_NAME = "charles_session";
 
 export type SessionUser = {
   id: string;
@@ -19,60 +10,30 @@ export type SessionUser = {
   country: string | null;
 };
 
-export async function hashPassword(password: string) {
-  return bcrypt.hash(password, 10);
-}
-
-export async function verifyPassword(password: string, hash: string) {
-  return bcrypt.compare(password, hash);
-}
-
-export async function createSession(user: SessionUser) {
-  const token = await new SignJWT({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    language: user.language,
-    country: user.country,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("7d")
-    .sign(SECRET);
-
-  const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-}
-
-export async function destroySession() {
-  const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
-}
-
 export async function getSession(): Promise<SessionUser | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
+  const authClient = await createAuthServerClient();
+  const {
+    data: { user: authUser },
+  } = await authClient.auth.getUser();
 
-  try {
-    const { payload } = await jwtVerify(token, SECRET);
-    return {
-      id: payload.id as string,
-      email: payload.email as string,
-      name: payload.name as string,
-      role: payload.role as Role,
-      language: payload.language as string,
-      country: (payload.country as string) ?? null,
-    };
-  } catch {
-    return null;
-  }
+  if (!authUser?.email) return null;
+
+  const { data: appUser } = await createAdminClient()
+    .from("User")
+    .select("id, email, name, role, language, country")
+    .eq("email", authUser.email)
+    .maybeSingle();
+
+  if (!appUser) return null;
+
+  return {
+    id: appUser.id,
+    email: appUser.email,
+    name: appUser.name,
+    role: appUser.role as Role,
+    language: appUser.language,
+    country: appUser.country,
+  };
 }
 
 export async function requireSession(roles?: Role[]) {
@@ -99,7 +60,7 @@ export async function createNotification(
   message: string,
   type: NotificationType = "SYSTEM"
 ) {
-  const { data, error } = await getSupabase()
+  const { data, error } = await createAdminClient()
     .from("Notification")
     .insert({
       id: crypto.randomUUID(),

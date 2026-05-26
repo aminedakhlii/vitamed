@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/db";
-import { createSession, verifyPassword, roleDashboardPath } from "@/lib/auth";
+import { createAdminClient, createAuthRouteClient } from "@/lib/supabase/server";
+import { roleDashboardPath } from "@/lib/auth";
 import type { Role } from "@/lib/types";
 import { z } from "zod";
 
@@ -14,14 +14,22 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = schema.parse(body);
 
-    const { data: user, error } = await getSupabase()
+    const authClient = await createAuthRouteClient();
+    const { error: signInError } = await authClient.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (signInError) {
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    }
+
+    const { data: user } = await createAdminClient()
       .from("User")
-      .select("*")
+      .select("id, email, name, role, language, country")
       .eq("email", email)
       .maybeSingle();
-
-    if (error || !user || !(await verifyPassword(password, user.passwordHash))) {
-      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "User profile missing" }, { status: 400 });
     }
 
     const sessionUser = {
@@ -32,8 +40,6 @@ export async function POST(request: Request) {
       language: user.language,
       country: user.country,
     };
-
-    await createSession(sessionUser);
 
     return NextResponse.json({
       user: sessionUser,
