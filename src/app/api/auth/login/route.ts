@@ -1,9 +1,17 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
 import { createAdminClient } from "@/lib/supabase/server";
+import {
+  applyAuthCookies,
+  createSupabaseRouteHandlerClient,
+  type AuthCookieEntry,
+} from "@/lib/supabase/route-handler";
+import { getSupabaseEnvDiagnostics } from "@/lib/supabase/env";
 import { roleDashboardPath, safeRedirectPath } from "@/lib/auth";
 import type { Role } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 function loginErrorRedirect(request: Request, message: string, from?: string) {
   const url = new URL("/login", request.url);
@@ -13,6 +21,16 @@ function loginErrorRedirect(request: Request, message: string, from?: string) {
 }
 
 export async function POST(request: Request) {
+  const envDiag = getSupabaseEnvDiagnostics();
+  if (!envDiag.configured) {
+    const msg =
+      "Server misconfiguration: Supabase env vars missing on Vercel. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then redeploy.";
+    if (request.headers.get("content-type")?.includes("application/json")) {
+      return NextResponse.json({ error: msg }, { status: 500 });
+    }
+    return loginErrorRedirect(request, msg);
+  }
+
   const contentType = request.headers.get("content-type") ?? "";
   let email: string;
   let password: string;
@@ -42,40 +60,41 @@ export async function POST(request: Request) {
   }
 
   const cookieStore = await cookies();
-  const authCookies: {
-    name: string;
-    value: string;
-    options?: Parameters<typeof cookieStore.set>[2];
-  }[] = [];
+  const authCookies: AuthCookieEntry[] = [];
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-            authCookies.push({ name, value, options });
-          });
-        },
-      },
-    }
-  );
+  const signInResponse = NextResponse.json({ ok: true });
+  const supabase = createSupabaseRouteHandlerClient(cookieStore, signInResponse, authCookies);
 
-  const { error: signInError } = await supabase.auth.signInWithPassword({
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (signInError) {
+    console.error("[auth:login] signIn failed", {
+      email,
+      message: signInError.message,
+      env: envDiag,
+    });
     if (contentType.includes("application/json")) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
     return loginErrorRedirect(request, "Invalid email or password", from);
+  }
+
+  if (!signInData.session || authCookies.length === 0) {
+    const msg =
+      "Login succeeded but session cookies were not written. Check Vercel env vars match your local .env Supabase project.";
+    console.error("[auth:login] no session cookies", {
+      email,
+      hasSession: !!signInData.session,
+      cookieCount: authCookies.length,
+      env: envDiag,
+    });
+    if (contentType.includes("application/json")) {
+      return NextResponse.json({ error: msg }, { status: 500 });
+    }
+    return loginErrorRedirect(request, msg, from);
   }
 
   const { data: user } = await createAdminClient()
@@ -86,7 +105,7 @@ export async function POST(request: Request) {
 
   if (!user) {
     if (contentType.includes("application/json")) {
-      return NextResponse.json({ error: "User profile missing" }, { status: 400 });
+      return NextResponse.json({ error: "User profile missing in database" }, { status: 400 });
     }
     return loginErrorRedirect(request, "User profile missing in database", from);
   }
@@ -94,16 +113,17 @@ export async function POST(request: Request) {
   const role = user.role as Role;
   const destination = safeRedirectPath(from, roleDashboardPath(role));
 
-  console.log("[auth:login]", {
+  console.log("[auth:login] success", {
     email,
     role,
-    from: from || null,
     destination,
     cookieCount: authCookies.length,
+    cookieNames: authCookies.map((c) => c.name),
+    projectRef: envDiag.projectRef,
   });
 
   if (contentType.includes("application/json")) {
-    const response = NextResponse.json({
+    const jsonResponse = NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
@@ -114,17 +134,13 @@ export async function POST(request: Request) {
       },
       redirect: destination,
     });
-    authCookies.forEach(({ name, value, options }) => {
-      response.cookies.set(name, value, options);
-    });
-    return response;
+    applyAuthCookies(jsonResponse, authCookies);
+    return jsonResponse;
   }
 
-  const response = NextResponse.redirect(new URL(destination, request.url), {
+  const redirectResponse = NextResponse.redirect(new URL(destination, request.url), {
     status: 303,
   });
-  authCookies.forEach(({ name, value, options }) => {
-    response.cookies.set(name, value, options);
-  });
-  return response;
+  applyAuthCookies(redirectResponse, authCookies);
+  return redirectResponse;
 }
