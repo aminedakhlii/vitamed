@@ -7,10 +7,13 @@ import { createBrowserClient } from "@/lib/supabase/client";
 /**
  * Keeps the browser cookie session fresh and syncs Next.js server state.
  *
- * On Vercel, middleware skips getUser() (avoids network round-trips) and trusts
- * the cookie directly. This component is the counterpart: it runs in the
- * browser and proactively refreshes the access token so the cookie always has a
- * valid session when the server reads it.
+ * Strategy:
+ * - On tab focus: ask Supabase to validate/refresh the token (network call).
+ *   If it succeeds, refresh the server components. If it fails, do NOTHING —
+ *   middleware already uses getSession() (cookie-only, no network), so the user
+ *   will stay on the page. Only redirect to login if getSession() also returns
+ *   null (truly no session in the cookie at all).
+ * - On TOKEN_REFRESHED: sync new cookies to the server via router.refresh().
  */
 export function SupabaseAuthListener() {
   const router = useRouter();
@@ -19,37 +22,34 @@ export function SupabaseAuthListener() {
   useEffect(() => {
     const sb = supabase.current;
 
-    const {
-      data: { subscription },
-    } = sb.auth.onAuthStateChange((event) => {
-      if (
-        event === "TOKEN_REFRESHED" ||
-        event === "SIGNED_IN" ||
-        event === "SIGNED_OUT" ||
-        event === "USER_UPDATED"
-      ) {
-        // Tell Next.js to re-fetch server components so they see updated cookies.
+    const { data: { subscription } } = sb.auth.onAuthStateChange((event) => {
+      if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
         router.refresh();
+      }
+      if (event === "SIGNED_OUT") {
+        router.push("/login");
       }
     });
 
     const handleVisibilityChange = async () => {
       if (document.visibilityState !== "visible") return;
 
-      // When returning to the tab, call getUser() which forces Supabase to
-      // validate and — if expired — refresh the access token using the refresh
-      // token in the cookie. Without this, a backgrounded tab may hold a stale
-      // token that server components reject after a navigation.
-      const { data, error } = await sb.auth.getUser();
+      // First check if there's a session in the cookie (no network).
+      const { data: sessionData } = await sb.auth.getSession();
 
-      if (data.user) {
-        // Token was valid or just refreshed — re-sync the server state.
-        router.refresh();
-      } else if (error) {
-        // Refresh token is also expired/revoked — redirect to login.
-        const from = encodeURIComponent(window.location.pathname);
-        router.push(`/login?from=${from}`);
+      if (!sessionData.session) {
+        // No session cookie at all — let the user navigate and middleware
+        // will redirect to login when they click a link.
+        return;
       }
+
+      // Session cookie exists. Try to validate / refresh it.
+      // This call makes a network request to Supabase. If it succeeds, the
+      // new access token is written to the cookie and TOKEN_REFRESHED fires
+      // (which triggers router.refresh() above). If it fails (network error,
+      // temporary Supabase issue), we still have a valid session cookie that
+      // the server-side getSession() can read — so we do NOT redirect to login.
+      await sb.auth.getUser();
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);

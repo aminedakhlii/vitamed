@@ -8,6 +8,7 @@ import {
 } from "@/lib/supabase/route-handler";
 import { getSupabaseEnvDiagnostics } from "@/lib/supabase/env";
 import { roleDashboardPath, safeRedirectPath } from "@/lib/auth";
+import { nowIso } from "@/lib/id";
 import type { Role } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +24,7 @@ function loginErrorRedirect(request: Request, message: string, from?: string) {
 export async function POST(request: Request) {
   const envDiag = getSupabaseEnvDiagnostics();
   if (!envDiag.configured) {
-    const msg =
-      "Server misconfiguration: Supabase env vars missing on Vercel. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then redeploy.";
+    const msg = "Server misconfiguration: Supabase env vars missing.";
     if (request.headers.get("content-type")?.includes("application/json")) {
       return NextResponse.json({ error: msg }, { status: 500 });
     }
@@ -71,11 +71,7 @@ export async function POST(request: Request) {
   });
 
   if (signInError) {
-    console.error("[auth:login] signIn failed", {
-      email,
-      message: signInError.message,
-      env: envDiag,
-    });
+    console.error("[auth:login] signIn failed", { email, message: signInError.message });
     if (contentType.includes("application/json")) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
@@ -83,13 +79,11 @@ export async function POST(request: Request) {
   }
 
   if (!signInData.session || authCookies.length === 0) {
-    const msg =
-      "Login succeeded but session cookies were not written. Check Vercel env vars match your local .env Supabase project.";
+    const msg = "Login succeeded but session cookies were not written.";
     console.error("[auth:login] no session cookies", {
       email,
       hasSession: !!signInData.session,
       cookieCount: authCookies.length,
-      env: envDiag,
     });
     if (contentType.includes("application/json")) {
       return NextResponse.json({ error: msg }, { status: 500 });
@@ -97,17 +91,54 @@ export async function POST(request: Request) {
     return loginErrorRedirect(request, msg, from);
   }
 
-  const { data: user } = await createAdminClient()
+  const admin = createAdminClient();
+  let { data: user } = await admin
     .from("User")
     .select("id, email, name, role, language, country")
     .eq("email", email)
     .maybeSingle();
 
+  // ── Auto-provision ──────────────────────────────────────────────────────────
+  // If the user exists in Supabase Auth but NOT in the public.User table (e.g.
+  // added manually via the Supabase Dashboard), create a minimal profile row so
+  // they can sign in. Role defaults to CLIENT; an admin can promote it later.
+  if (!user && signInData.user) {
+    const authUser = signInData.user;
+    const meta = authUser.user_metadata ?? {};
+    const now = nowIso();
+    const newUser = {
+      id: authUser.id,
+      email: authUser.email ?? email,
+      passwordHash: null,
+      name: (meta.name as string) || (authUser.email ?? email).split("@")[0],
+      role: (meta.role as Role) || "CLIENT",
+      company: (meta.company as string) ?? null,
+      country: (meta.country as string) ?? null,
+      language: (meta.language as string) || "en",
+      phone: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const { data: created, error: createError } = await admin
+      .from("User")
+      .insert(newUser)
+      .select("id, email, name, role, language, country")
+      .single();
+
+    if (createError) {
+      console.error("[auth:login] failed to auto-create User row", createError.message);
+    } else {
+      user = created;
+      console.log("[auth:login] auto-created User row for", email, "role=", newUser.role);
+    }
+  }
+
   if (!user) {
     if (contentType.includes("application/json")) {
-      return NextResponse.json({ error: "User profile missing in database" }, { status: 400 });
+      return NextResponse.json({ error: "User profile could not be created." }, { status: 400 });
     }
-    return loginErrorRedirect(request, "User profile missing in database", from);
+    return loginErrorRedirect(request, "User profile could not be created.", from);
   }
 
   const role = user.role as Role;
@@ -119,7 +150,6 @@ export async function POST(request: Request) {
     destination,
     cookieCount: authCookies.length,
     cookieNames: authCookies.map((c) => c.name),
-    projectRef: envDiag.projectRef,
   });
 
   if (contentType.includes("application/json")) {
