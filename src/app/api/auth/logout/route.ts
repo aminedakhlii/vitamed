@@ -4,7 +4,7 @@ import { createAuthRouteClient } from "@/lib/supabase/server";
 async function logout() {
   const authClient = await createAuthRouteClient();
   await authClient.auth.signOut();
-  return NextResponse.redirect(new URL("/login", "http://localhost:3000"));
+  return NextResponse.redirect(new URL("/login", "https://vitamed-lyart.vercel.app"));
 }
 
 export async function POST() {
