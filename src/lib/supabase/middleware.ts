@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { roleDashboardPath } from "@/lib/auth";
+import { roleDashboardPath, safeRedirectPath } from "@/lib/auth";
 import type { Role } from "@/lib/types";
 
 const publicPaths = ["/", "/login", "/register", "/forgot-password"];
@@ -66,25 +66,38 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
+  const role = user?.email ? await getUserRole(user.email) : null;
+
+  console.log("[auth:middleware]", {
+    pathname,
+    hasUser: !!user,
+    email: user?.email ?? null,
+    role,
+    authError: authError?.message ?? null,
+    from: request.nextUrl.searchParams.get("from"),
+  });
+
   if (user && isAuthPage) {
-    const role = (await getUserRole(user.email!)) ?? "CLIENT";
-    const redirect = NextResponse.redirect(
-      new URL(roleDashboardPath(role), request.url)
-    );
+    const from = request.nextUrl.searchParams.get("from");
+    const destination = safeRedirectPath(from, roleDashboardPath(role ?? "CLIENT"));
+    const redirect = NextResponse.redirect(new URL(destination, request.url));
     copyCookies(supabaseResponse, redirect);
     return redirect;
   }
 
   if (user && pathname.startsWith("/dashboard/admin")) {
-    const role = await getUserRole(user.email!);
     if (role && role !== "ADMIN") {
       const redirect = NextResponse.redirect(
         new URL(roleDashboardPath(role), request.url)
       );
       copyCookies(supabaseResponse, redirect);
       return redirect;
+    }
+    if (role === null) {
+      console.warn("[auth:middleware] ADMIN route but no DB role for", user.email);
     }
   }
 

@@ -1,17 +1,17 @@
 "use client";
 
-import { useActionState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DEMO_USERS } from "@/lib/constants";
-import { loginAction, type LoginState } from "@/app/(auth)/login/actions";
 
-const initialState: LoginState = {};
-
-export function LoginForm({ from }: { from?: string }) {
-  const [state, formAction, pending] = useActionState(loginAction, initialState);
-
+export function LoginForm({
+  from,
+  error,
+}: {
+  from?: string;
+  error?: string;
+}) {
   function fillDemo(demoEmail: string, demoPassword: string) {
     const emailInput = document.getElementById("login-email") as HTMLInputElement | null;
     const passwordInput = document.getElementById("login-password") as HTMLInputElement | null;
@@ -27,9 +27,14 @@ export function LoginForm({ from }: { from?: string }) {
         </div>
         <h1 className="text-xl font-bold text-slate-900">Sign in to Charles Platform</h1>
         <p className="text-sm text-slate-500 mt-1">Enter your credentials to access your portal</p>
+        {from ? (
+          <p className="text-xs text-slate-400 mt-2">
+            After sign-in you will return to <span className="font-mono">{from}</span>
+          </p>
+        ) : null}
       </div>
 
-      <form action={formAction} className="space-y-4">
+      <form action="/api/auth/login" method="POST" className="space-y-4">
         {from ? <input type="hidden" name="from" value={from} /> : null}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="login-email">
@@ -39,7 +44,7 @@ export function LoginForm({ from }: { from?: string }) {
             id="login-email"
             name="email"
             type="email"
-            defaultValue=""
+            autoComplete="email"
             placeholder="you@company.com"
             required
           />
@@ -52,13 +57,13 @@ export function LoginForm({ from }: { from?: string }) {
             id="login-password"
             name="password"
             type="password"
-            defaultValue=""
+            autoComplete="current-password"
             required
           />
         </div>
-        {state.error && <p className="text-sm text-red-600">{state.error}</p>}
-        <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Signing in…" : "Sign in"}
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        <Button type="submit" className="w-full">
+          Sign in
         </Button>
       </form>
 

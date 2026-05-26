@@ -87,6 +87,14 @@ export function roleDashboardPath(role: Role) {
   }
 }
 
+/** Safe internal path for post-login redirect (blocks open redirects). */
+export function safeRedirectPath(from: string | null | undefined, fallback: string) {
+  if (from && from.startsWith("/") && !from.startsWith("//")) {
+    return from;
+  }
+  return fallback;
+}
+
 export async function createNotification(
   userId: string,
   title: string,
