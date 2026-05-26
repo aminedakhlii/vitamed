@@ -1,0 +1,1261 @@
+[
+  {
+    "code": "KB350ML",
+    "name": "Bile Bag 350ml",
+    "category": "Bile Bags",
+    "description": "VITAIMED bile collection bag, 350ml.",
+    "capacity": "350ml",
+    "packaging": "",
+    "features": [
+      "PVC bag",
+      "80cm inlet tubing",
+      "Anti-Reflux Valve",
+      "Cross Valve"
+    ]
+  },
+  {
+    "code": "KB500ML",
+    "name": "Bile Bag 500ml",
+    "category": "Bile Bags",
+    "description": "VITAIMED bile collection bag, 500ml.",
+    "capacity": "500ml",
+    "packaging": "",
+    "features": [
+      "PVC bag",
+      "80cm inlet tubing",
+      "Anti-Reflux Valve",
+      "Cross Valve"
+    ]
+  },
+  {
+    "code": "KB750ML",
+    "name": "Bile Bag 750ml",
+    "category": "Bile Bags",
+    "description": "VITAIMED bile collection bag, 750ml.",
+    "capacity": "750ml",
+    "packaging": "",
+    "features": [
+      "PVC bag",
+      "80cm inlet tubing",
+      "Anti-Reflux Valve",
+      "Cross Valve"
+    ]
+  },
+  {
+    "code": "KB900ML",
+    "name": "Bile Bag 900ml",
+    "category": "Bile Bags",
+    "description": "VITAIMED bile collection bag, 900ml.",
+    "capacity": "900ml",
+    "packaging": "",
+    "features": [
+      "PVC bag",
+      "80cm inlet tubing",
+      "Anti-Reflux Valve",
+      "Cross Valve"
+    ]
+  },
+  {
+    "code": "KY-IR-6-1",
+    "name": "Two Lead TUR Irrigation Set",
+    "category": "Bladder Irrigation Sets",
+    "description": "VITAIMED Two Lead TUR Irrigation Set. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "25 pcs/carton",
+    "features": [
+      "Tube(A) Ø10.8mm Length 230±5mm",
+      "Tube(B) Ø10.8mm Length 2050±20mm",
+      "Tube(C) Elastomeric material, latex-free, Length 150mm",
+      "25 pcs/carton"
+    ]
+  },
+  {
+    "code": "KY-IR-6-2",
+    "name": "Four Lead Arthroscopic Irrigation Set",
+    "category": "Bladder Irrigation Sets",
+    "description": "VITAIMED Four Lead Arthroscopic Irrigation Set. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "25 pcs/carton",
+    "features": [
+      "Tube(A) Ø9mm Length 234±5mm",
+      "Tube(B) Ø10.8mm Length 1756±15mm",
+      "Drip Chamber",
+      "Tube(C) Elastomeric material, latex-free, Length 150mm",
+      "25 pcs/carton"
+    ]
+  },
+  {
+    "code": "KY-IR-6-3",
+    "name": "Four Lead Arthroscopic Irrigation Set (short)",
+    "category": "Bladder Irrigation Sets",
+    "description": "VITAIMED Four Lead Arthroscopic Irrigation Set (short). See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "25 pcs/carton",
+    "features": [
+      "Tube(A) Ø9mm Length 234±5mm",
+      "Tube(B) Ø10.8mm Length 1295±15mm",
+      "Drip Chamber",
+      "Tube(C) Elastomeric material, latex-free, Length 150mm",
+      "25 pcs/carton"
+    ]
+  },
+  {
+    "code": "KY-IR-6-4",
+    "name": "Y-type TUR Irrigation Set",
+    "category": "Bladder Irrigation Sets",
+    "description": "VITAIMED Y-type TUR Irrigation Set. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "25 pcs/carton",
+    "features": [
+      "Tube(A) Ø9mm Length 234±5mm",
+      "Tube(B) Ø9mm Length 1630±15mm",
+      "Tube(C) Elastomeric material, latex-free, Length 150mm",
+      "25 pcs/carton"
+    ]
+  },
+  {
+    "code": "KY-IR-6-5",
+    "name": "Cysto/Bladder Irrigation Set",
+    "category": "Bladder Irrigation Sets",
+    "description": "VITAIMED Cysto/Bladder Irrigation Set. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "25 pcs/carton",
+    "features": [
+      "Tube(A) Ø7mm Length 215±5mm",
+      "Tube(B) Ø7mm Length 1525±15mm",
+      "Tube(C) Elastomeric material, latex-free, Length 150mm",
+      "Drip Chamber",
+      "Regulator",
+      "25 pcs/carton"
+    ]
+  },
+  {
+    "code": "KY-IR-6-6",
+    "name": "Cysto/Bladder Irrigation Set (compact)",
+    "category": "Bladder Irrigation Sets",
+    "description": "VITAIMED Cysto/Bladder Irrigation Set (compact). See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "50 pcs/carton",
+    "features": [
+      "Tube(A) Ø7mm Length 52±5mm",
+      "Tube(B) Ø7mm Length 1775±15mm",
+      "Tube(C) Elastomeric material, latex-free, Length 150mm",
+      "Drip Chamber",
+      "Regulator",
+      "50 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYB01",
+    "name": "Economic Urine Bag — Pull valve",
+    "category": "Economic Urine Bags",
+    "description": "Pullsh and Pull valve Tube Ø6.4*900mm Anti-Reflux Valve",
+    "capacity": "2000ml",
+    "packaging": "250 pcs/carton",
+    "features": [
+      "Pullsh and Pull valve",
+      "Tube Ø6.4*900mm",
+      "Anti-Reflux Valve",
+      "250 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYB03",
+    "name": "Economic Urine Bag — Cross valve",
+    "category": "Economic Urine Bags",
+    "description": "Cross valve Tube Ø6.4*900mm Anti-Reflux Valve",
+    "capacity": "2000ml",
+    "packaging": "250 pcs/carton",
+    "features": [
+      "Cross valve",
+      "Tube Ø6.4*900mm",
+      "Anti-Reflux Valve",
+      "250 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYB04",
+    "name": "Economic Urine Bag — Without outlet",
+    "category": "Economic Urine Bags",
+    "description": "Without outlet valve Tube Ø6.4*900mm Anti-Reflux Valve or Without",
+    "capacity": "2000ml",
+    "packaging": "250 pcs/carton",
+    "features": [
+      "Without outlet valve",
+      "Tube Ø6.4*900mm",
+      "Anti-Reflux Valve or Without",
+      "250 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYB07",
+    "name": "Economic Urine Bag 4000ml — Screw valve",
+    "category": "Economic Urine Bags",
+    "description": "Screw valve Tube 100cm Anti-Reflux Valve",
+    "capacity": "4000ml",
+    "packaging": "150 pcs/carton",
+    "features": [
+      "Screw valve",
+      "Tube 100cm",
+      "Anti-Reflux Valve",
+      "Needleless Sampling Port",
+      "150 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYB13",
+    "name": "Economic Urine Bag — PVC Strip Hanger",
+    "category": "Economic Urine Bags",
+    "description": "Cross valve Tube Ø6.4*900mm Anti-Reflux Valve",
+    "capacity": "2000ml",
+    "packaging": "200 pcs/carton",
+    "features": [
+      "Cross valve",
+      "Tube Ø6.4*900mm",
+      "Anti-Reflux Valve",
+      "With PVC Strip Hanger",
+      "200 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYB15",
+    "name": "Economic Urine Bag — Sampling port",
+    "category": "Economic Urine Bags",
+    "description": "Cross valve Tube 120cm Needleless Sampling Port",
+    "capacity": "2000ml",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Cross valve",
+      "Tube 120cm",
+      "Needleless Sampling Port",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYE01",
+    "name": "Urine Bag with Straps 750ml",
+    "category": "Economic Urine Bags",
+    "description": "VITAIMED Urine Bag with Straps 750ml. See VITAIMED catalogue.",
+    "capacity": "750ml",
+    "packaging": "250 pcs/carton",
+    "features": [
+      "Cross Valve",
+      "Length 30cm Tube",
+      "Adapter with cap, Anti-Reflux Valve",
+      "250 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYE07",
+    "name": "Urine Bag with Straps KYE07",
+    "category": "Economic Urine Bags",
+    "description": "Economic urine bag variant KYE07.",
+    "capacity": "",
+    "packaging": "",
+    "features": []
+  },
+  {
+    "code": "KYE09",
+    "name": "Urine Bag with Straps KYE09",
+    "category": "Economic Urine Bags",
+    "description": "Economic urine bag variant KYE09.",
+    "capacity": "",
+    "packaging": "",
+    "features": []
+  },
+  {
+    "code": "GV001",
+    "name": "Laryngoscope — Lock type",
+    "category": "Laryngoscopes",
+    "description": "VITAIMED Laryngoscope — Lock type. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Lock type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV002",
+    "name": "Laryngoscope — Threaded Rod locking",
+    "category": "Laryngoscopes",
+    "description": "Threaded Rod locking Type 100 pcs/carton",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Threaded Rod locking Type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV003",
+    "name": "Laryngoscope — Pole type",
+    "category": "Laryngoscopes",
+    "description": "VITAIMED Laryngoscope — Pole type. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Pole type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV004",
+    "name": "Laryngoscope — Middle screw type",
+    "category": "Laryngoscopes",
+    "description": "Middle screw type 100 pcs/carton",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Middle screw type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV005",
+    "name": "Laryngoscope — Side screw type",
+    "category": "Laryngoscopes",
+    "description": "Side screw type 100 pcs/carton",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Side screw type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV007",
+    "name": "Laryngoscope — American type w/ light",
+    "category": "Laryngoscopes",
+    "description": "W/A light source American type S/M: 100 pcs/carton L: 80 pcs/carton",
+    "capacity": "",
+    "packaging": "S/M: 100 pcs/carton L: 80 pcs/carton",
+    "features": [
+      "W/A light source American type",
+      "S/M: 100 pcs/carton L: 80 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV008",
+    "name": "Laryngoscope — Pull-push type",
+    "category": "Laryngoscopes",
+    "description": "VITAIMED Laryngoscope — Pull-push type. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Pull-push type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV009",
+    "name": "Laryngoscope — Middle screw mist absorption",
+    "category": "Laryngoscopes",
+    "description": "Middle screw Mist absorption 100 pcs/carton",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Middle screw Mist absorption",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV010",
+    "name": "Laryngoscope — Pole type w/ light source",
+    "category": "Laryngoscopes",
+    "description": "W/A light source Pole type 100 pcs/carton",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "W/A light source Pole type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "GV011",
+    "name": "Laryngoscope — Brazil type",
+    "category": "Laryngoscopes",
+    "description": "VITAIMED Laryngoscope — Brazil type. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Brazil type",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "VTLEC",
+    "name": "Latex External Catheter",
+    "category": "Male External Catheters",
+    "description": "VITAIMED Latex External Catheter. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "DEHP Free (selectable)",
+      "VITAIMED catalogue product"
+    ]
+  },
+  {
+    "code": "VTSEC",
+    "name": "Silicone External Catheter — Adhesive tape",
+    "category": "Male External Catheters",
+    "description": "VITAIMED Silicone External Catheter — Adhesive tape. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "DEHP Free (selectable)",
+      "VITAIMED catalogue product"
+    ]
+  },
+  {
+    "code": "VTSSEC",
+    "name": "Silicone External Catheter — Self-adhesive",
+    "category": "Male External Catheters",
+    "description": "VITAIMED Silicone External Catheter — Self-adhesive. See VITAIMED catalogue.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "DEHP Free (selectable)",
+      "VITAIMED catalogue product"
+    ]
+  },
+  {
+    "code": "11416",
+    "name": "Vistoma One-piece Urostomy System — 11416",
+    "category": "Ostomy Care",
+    "description": "Vistoma One-piece Urostomy System — 11416",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Max cut: 60mm",
+      "Deodorization: Carbon Fliter",
+      "Baseplate: Flat Plate",
+      "Sealing: Clamp Closure"
+    ]
+  },
+  {
+    "code": "11418",
+    "name": "Vistoma Ostomy Pouch — 11418",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 11418",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Max cut: 70mm",
+      "Deodorization: Carbon Fliter",
+      "Baseplate: Flat Plate",
+      "Sealing: Magic tap"
+    ]
+  },
+  {
+    "code": "11420",
+    "name": "Vistoma Ostomy Pouch — 11420",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 11420",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Max cut: 65mm",
+      "Deodorization: Carbon Fliter",
+      "Baseplate: Flat Plate"
+    ]
+  },
+  {
+    "code": "1205",
+    "name": "Vistoma Ostomy Pouch — 1205",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 1205",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Deodorization: Carbon Fliter",
+      "Baseplate: 51405",
+      "Sealing: Clamp Closure",
+      "Baseplate: C51402"
+    ]
+  },
+  {
+    "code": "1215",
+    "name": "Vistoma Ostomy Pouch — 1215",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 1215",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Deodorization: Carbon Fliter",
+      "Baseplate: 51407",
+      "Sealing: Magic tap"
+    ]
+  },
+  {
+    "code": "21202",
+    "name": "Vistoma One-piece Colostomy Closed System — 21202",
+    "category": "Ostomy Care",
+    "description": "Vistoma One-piece Colostomy Closed System — 21202",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Deodorization: Carbon Fliter",
+      "Baseplate: 51405",
+      "Sealing: Closed"
+    ]
+  },
+  {
+    "code": "21402",
+    "name": "Vistoma Ostomy Pouch — 21402",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 21402",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Max cut: 45mm",
+      "Deodorization: Non",
+      "Baseplate: Flat Plate",
+      "Sealing: Drainable Valve"
+    ]
+  },
+  {
+    "code": "2202",
+    "name": "Vistoma Ostomy Pouch — 2202",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 2202",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Deodorization: Non",
+      "Baseplate: 52402",
+      "Sealing: Drainable Valve"
+    ]
+  },
+  {
+    "code": "2203",
+    "name": "Vistoma Ostomy Pouch — 2203",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 2203",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Deodorization: Non",
+      "Baseplate: C51402",
+      "Sealing: Drainable Valve"
+    ]
+  },
+  {
+    "code": "51405",
+    "name": "Vistoma Ostomy Pouch — 51405",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 51405",
+    "capacity": "",
+    "packaging": "5pcs/box",
+    "features": [
+      "Max cut: 57mm",
+      "Baseplate: Flat Plate"
+    ]
+  },
+  {
+    "code": "51407",
+    "name": "Vistoma Ostomy Pouch — 51407",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 51407",
+    "capacity": "",
+    "packaging": "5pcs/box",
+    "features": [
+      "Max cut: 70mm",
+      "Baseplate: Flat Plate"
+    ]
+  },
+  {
+    "code": "52402",
+    "name": "Vistoma Ostomy Pouch — 52402",
+    "category": "Ostomy Care",
+    "description": "Vistoma Ostomy Pouch — 52402",
+    "capacity": "",
+    "packaging": "5pcs/box",
+    "features": [
+      "Max cut: 45mm",
+      "Baseplate: Flat Plate"
+    ]
+  },
+  {
+    "code": "611203",
+    "name": "Vistoma One-piece Colostomy System for Kids — 611203",
+    "category": "Ostomy Care",
+    "description": "Vistoma One-piece Colostomy System for Kids — 611203",
+    "capacity": "",
+    "packaging": "10pcs/box",
+    "features": [
+      "Max cut: 35mm",
+      "Deodorization: Non",
+      "Baseplate: Flat Plate",
+      "Sealing: Magic tap"
+    ]
+  },
+  {
+    "code": "C11201",
+    "name": "Vistoma One-piece Colostomy Convex System — C11201",
+    "category": "Ostomy Care",
+    "description": "Vistoma One-piece Colostomy Convex System — C11201",
+    "capacity": "",
+    "packaging": "5pcs/box",
+    "features": [
+      "Max cut: 45mm",
+      "Deodorization: Carbon Fliter",
+      "Baseplate: Convex Type",
+      "Sealing: Magic tap"
+    ]
+  },
+  {
+    "code": "C11401",
+    "name": "Vistoma One-piece Colostomy Convex System — C11401",
+    "category": "Ostomy Care",
+    "description": "Vistoma One-piece Colostomy Convex System — C11401",
+    "capacity": "",
+    "packaging": "5pcs/box",
+    "features": [
+      "Max cut: 45mm",
+      "Deodorization: Carbon Fliter",
+      "Baseplate: Convex Type",
+      "Sealing: Clamp Closure"
+    ]
+  },
+  {
+    "code": "C21201",
+    "name": "Vistoma One-piece Colostomy Convex System — C21201",
+    "category": "Ostomy Care",
+    "description": "Vistoma One-piece Colostomy Convex System — C21201",
+    "capacity": "",
+    "packaging": "5pcs/box",
+    "features": [
+      "Max cut: 45mm",
+      "Deodorization: Non",
+      "Baseplate: Convex Type",
+      "Sealing: Drainable Valve"
+    ]
+  },
+  {
+    "code": "C51402",
+    "name": "Vistoma One-piece Colostomy Convex System — C51402",
+    "category": "Ostomy Care",
+    "description": "Vistoma One-piece Colostomy Convex System — C51402",
+    "capacity": "",
+    "packaging": "5pcs/box",
+    "features": [
+      "Max cut: 45mm",
+      "Baseplate: Convex Type"
+    ]
+  },
+  {
+    "code": "KYA01",
+    "name": "Pediatric Urinary Collection Bag KYA01",
+    "category": "Pediatric Urine Bags",
+    "description": "Capacity: 200ml",
+    "capacity": "200ml",
+    "packaging": "",
+    "features": []
+  },
+  {
+    "code": "KYA01-1",
+    "name": "Pediatric Urinary Collection Bag — Open side",
+    "category": "Pediatric Urine Bags",
+    "description": "VITAIMED Pediatric Urinary Collection Bag — Open side. See VITAIMED catalogue.",
+    "capacity": "100ml",
+    "packaging": "250 pcs/carton",
+    "features": [
+      "Open side face",
+      "Pediatric Urinary Collection Bag With Safety",
+      "Adhesive",
+      "5000 psc/carton"
+    ]
+  },
+  {
+    "code": "KYA01-2",
+    "name": "Pediatric Urinary Collection Bag KYA01-2",
+    "category": "Pediatric Urine Bags",
+    "description": "Capacity: 150ml",
+    "capacity": "150ml",
+    "packaging": "",
+    "features": []
+  },
+  {
+    "code": "KYA02",
+    "name": "Pediatric Urinary Collection Bag KYA02",
+    "category": "Pediatric Urine Bags",
+    "description": "Capacity: 200ml",
+    "capacity": "200ml",
+    "packaging": "",
+    "features": []
+  },
+  {
+    "code": "KYA02-1",
+    "name": "Pediatric Urinary Collection Bag — Anti-Reflux",
+    "category": "Pediatric Urine Bags",
+    "description": "With Anti-Reflux Valve Pediatric Urinary Collection Bag With Safety Adhesive",
+    "capacity": "100ml",
+    "packaging": "",
+    "features": [
+      "With Anti-Reflux Valve",
+      "Pediatric Urinary Collection Bag With Safety",
+      "Adhesive",
+      "5000 psc/carton",
+      "Urine Leg Bag Strarps amd Holder",
+      "LS03",
+      "LS02",
+      "UA05",
+      "LS01",
+      "LS10",
+      "Urine Bag Plastic Hanger",
+      "UA10UA07UA04"
+    ]
+  },
+  {
+    "code": "KYA02-2",
+    "name": "Pediatric Urinary Collection Bag KYA02-2",
+    "category": "Pediatric Urine Bags",
+    "description": "Capacity: 150ml",
+    "capacity": "150ml",
+    "packaging": "",
+    "features": []
+  },
+  {
+    "code": "CAPD01",
+    "name": "Peritoneal Dialysis Filtrate Bag — Luer",
+    "category": "Peritoneal Dialysis",
+    "description": "VITAIMED Peritoneal Dialysis Filtrate Bag — Luer. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "200 pcs/carton",
+    "features": [
+      "Luer taper",
+      "Material for bag : PVC",
+      "material for tubing line: PVC",
+      "200 pcs/carton"
+    ]
+  },
+  {
+    "code": "CAPD02",
+    "name": "Peritoneal Dialysis Filtrate Bag — Breakable valve",
+    "category": "Peritoneal Dialysis",
+    "description": "VITAIMED Peritoneal Dialysis Filtrate Bag — Breakable valve. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "200 pcs/carton",
+    "features": [
+      "Tubing line with breakable valve",
+      "Material for bag : PVC",
+      "material for tubing line: PVC",
+      "200 pcs/carton"
+    ]
+  },
+  {
+    "code": "CAPD03",
+    "name": "Peritoneal Dialysis Filtrate Bag",
+    "category": "Peritoneal Dialysis",
+    "description": "VITAIMED Peritoneal Dialysis Filtrate Bag. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "200 pcs/carton",
+    "features": [
+      "Material for bag : PVC",
+      "material for tubing line: PVC",
+      "200 pcs/carton"
+    ]
+  },
+  {
+    "code": "CAPD04",
+    "name": "Peritoneal Dialysis Filtrate Bag 10L",
+    "category": "Peritoneal Dialysis",
+    "description": "VITAIMED Peritoneal Dialysis Filtrate Bag 10L. See VITAIMED catalogue.",
+    "capacity": "10L",
+    "packaging": "200 pcs/carton",
+    "features": [
+      "Luer taper",
+      "With cross valve",
+      "Material for bag : PVC",
+      "material for tubing line: PVC",
+      "KYE07"
+    ]
+  },
+  {
+    "code": "KYC01",
+    "name": "Urinary Drainage Bag with Exercise Bulb",
+    "category": "Urinary Drainage Bags",
+    "description": "VITAIMED Urinary Drainage Bag with Exercise Bulb. See VITAIMED catalogue.",
+    "capacity": "2000ml.",
+    "packaging": "30 pcs/carton KYC01",
+    "features": [
+      "Urinary bladder Exercise Bulb",
+      "Universal Double-Hook and Rope Hanger",
+      "Needleless Sampling Port with Cap",
+      "120cm Inlet Tube with Bed Sheet Clamp,Slide Clamp",
+      "Anti-Reflux Drip Chamber, Air-Vent on the Bag",
+      "T-Tap Outlet Valve",
+      "Tube Pocket",
+      "30 pcs/carton KYC01"
+    ]
+  },
+  {
+    "code": "KYC02",
+    "name": "Urinary Drainage Bag — Single Hook",
+    "category": "Urinary Drainage Bags",
+    "description": "VITAIMED Urinary Drainage Bag — Single Hook. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "30 pcs/carton",
+    "features": [
+      "Air-Vent and Anti-Reflux Valve Drip chamber",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Single Hook and Rope Hanger",
+      "T-tap Drainage Port",
+      "30 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYC03",
+    "name": "Urinary Drainage Bag — Double Hook",
+    "category": "Urinary Drainage Bags",
+    "description": "VITAIMED Urinary Drainage Bag — Double Hook. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "30 pcs/carton",
+    "features": [
+      "Air-Vent and Anti-Reflux Valve Drip chamber",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double Hook and Rope Hanger",
+      "T-tap Drainage Port",
+      "Rigid Dog House",
+      "30 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYC04",
+    "name": "Urinary Drainage Bag — Single Hook T-Tap",
+    "category": "Urinary Drainage Bags",
+    "description": "VITAIMED Urinary Drainage Bag — Single Hook T-Tap. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "50 pcs/carton",
+    "features": [
+      "Air-Vent and Anti-Reflux Valve Drip chamber",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Single Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "50 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYC05",
+    "name": "Urinary Drainage Bag with Exercise Bulb 150cm",
+    "category": "Urinary Drainage Bags",
+    "description": "VITAIMED Urinary Drainage Bag with Exercise Bulb 150cm. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "30 pcs/carton",
+    "features": [
+      "Urinary bladder Exercise Bulb",
+      "Universal Double-Hook and Rope Hanger",
+      "Needleless Sampling Port with Cap",
+      "150cm Inlet Tube with Bed Sheet Clamp,Slide Clamp",
+      "Anti-Reflux Drip Chamber, Air-Vent on the Bag",
+      "T-Tap Outlet Valve",
+      "Tube Pocket",
+      "30 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYC07",
+    "name": "Urinary Drainage Bag — Cross Outlet",
+    "category": "Urinary Drainage Bags",
+    "description": "VITAIMED Urinary Drainage Bag — Cross Outlet. See VITAIMED catalogue.",
+    "capacity": "2000ml",
+    "packaging": "100 pcs/carton",
+    "features": [
+      "Air-Vent and Anti-Reflux Valve Drip chamber",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp",
+      "Universal Single Hook and Rope Hanger",
+      "Cross Outlet Valve with cap",
+      "100 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYC08",
+    "name": "Urinary Drainage Bag 5000ml",
+    "category": "Urinary Drainage Bags",
+    "description": "VITAIMED Urinary Drainage Bag 5000ml. See VITAIMED catalogue.",
+    "capacity": "5000ml",
+    "packaging": "30 pcs/carton",
+    "features": [
+      "Air-Vent and Anti-Reflux Valve Drip chamber",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double Hook and Rope Hanger",
+      "T-tap Drainage Port",
+      "Rigid Dog House",
+      "30 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD01",
+    "name": "Triple-chamber Urine Meter",
+    "category": "Urine Meters",
+    "description": "VITAIMED Triple-chamber Urine Meter. See VITAIMED catalogue.",
+    "capacity": "400ml+2600ml,fourfold chamber",
+    "packaging": "20 pcs/carton",
+    "features": [
+      "400cc Urine meter with drip chamber",
+      "Air-Vent and Anti-Reflux Valve",
+      "2600ml urine bag",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double-Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "20 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD02",
+    "name": "Double-chamber Urine Meter",
+    "category": "Urine Meters",
+    "description": "VITAIMED Double-chamber Urine Meter. See VITAIMED catalogue.",
+    "capacity": "400ml+2600ml,double chamber",
+    "packaging": "20 pcs/carton",
+    "features": [
+      "400cc Two Chamber Urine meter with drip chamber",
+      "Air-Vent and Anti-Reflux Valve",
+      "2600ml urine bag",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double-Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "20 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD03",
+    "name": "Single-chamber Urine Meter",
+    "category": "Urine Meters",
+    "description": "VITAIMED Single-chamber Urine Meter. See VITAIMED catalogue.",
+    "capacity": "200ml+2000ml",
+    "packaging": "20 pcs/carton KYD03",
+    "features": [
+      "200cc Urine meter with drip chamber",
+      "Air-Vent and Anti-Reflux Valve",
+      "2000ml urine bag",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double-Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "20 pcs/carton KYD03"
+    ]
+  },
+  {
+    "code": "KYD04",
+    "name": "Single-chamber Urine Meter 500ml+2000ml",
+    "category": "Urine Meters",
+    "description": "VITAIMED Single-chamber Urine Meter 500ml+2000ml. See VITAIMED catalogue.",
+    "capacity": "500ml+2000ml,single chamber",
+    "packaging": "20 pcs/carton",
+    "features": [
+      "2000ml urine bag",
+      "Air-Vent and Anti-Reflux Valve",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double-Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "20 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD04-1",
+    "name": "Single-chamber Urine Meter 500ml+2600ml",
+    "category": "Urine Meters",
+    "description": "VITAIMED Single-chamber Urine Meter 500ml+2600ml. See VITAIMED catalogue.",
+    "capacity": "500ml+2600ml,single chamber",
+    "packaging": "20 pcs/carton",
+    "features": [
+      "2600ml urine bag",
+      "Air-Vent and Anti-Reflux Valve",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double-Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "20 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD06",
+    "name": "Single-chamber Urine Meter 200ml+2000ml",
+    "category": "Urine Meters",
+    "description": "VITAIMED Single-chamber Urine Meter 200ml+2000ml. See VITAIMED catalogue.",
+    "capacity": "200ml+2000ml,single chamber",
+    "packaging": "20 pcs/carton",
+    "features": [
+      "2000ml urine bag",
+      "Air-Vent and Anti-Reflux Valve",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "Universal Double-Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "20 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD09",
+    "name": "ViUro 500 Classic",
+    "category": "Urine Meters",
+    "description": "VITAIMED ViUro 500 Classic. See VITAIMED catalogue.",
+    "capacity": "500ml+2000ml,",
+    "packaging": "10 pcs/carton",
+    "features": [
+      "500cc Urine meter with drip chamber",
+      "Air-Vent and Anti-Reflux Valve",
+      "2000ml urine bag",
+      "Needleless Sampling Port with Cap",
+      "150cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "With Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "10 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD10",
+    "name": "ViUro 500 Plus",
+    "category": "Urine Meters",
+    "description": "VITAIMED ViUro 500 Plus. See VITAIMED catalogue.",
+    "capacity": "500ml+2000ml,",
+    "packaging": "10 pcs/carton",
+    "features": [
+      "500cc Urine meter with drip chamber",
+      "Air-Vent and Anti-Reflux Valve",
+      "2000ml urine bag",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "With Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "10 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD11",
+    "name": "ViUro 500 Pro",
+    "category": "Urine Meters",
+    "description": "VITAIMED ViUro 500 Pro. See VITAIMED catalogue.",
+    "capacity": "500ml+2000ml,",
+    "packaging": "10 pcs/carton",
+    "features": [
+      "500cc Urine meter with drip chamber",
+      "Air-Vent and Anti-Reflux Valve",
+      "2000ml urine bag",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "With Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "10 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD12",
+    "name": "ViUro 500 Smart",
+    "category": "Urine Meters",
+    "description": "VITAIMED ViUro 500 Smart. See VITAIMED catalogue.",
+    "capacity": "500ml+2000ml,",
+    "packaging": "10 pcs/carton",
+    "features": [
+      "500cc Urine meter with drip chamber",
+      "Air-Vent and Anti-Reflux Valve",
+      "2000ml urine bag",
+      "Needleless Sampling Port with Cap",
+      "120cm Transparent Inlet Tube",
+      "Slide Clamp and Bed Sheet Clamp",
+      "With Double-Hook and Rope Hanger",
+      "T-Tap Outlet Valve",
+      "10 pcs/carton"
+    ]
+  },
+  {
+    "code": "KYD09-B",
+    "name": "Variant KYD09-B",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD09-B.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                         120                              10"
+    ]
+  },
+  {
+    "code": "KYD09-C",
+    "name": "Variant KYD09-C",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD09-C.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                         130                              10"
+    ]
+  },
+  {
+    "code": "KYD09-D",
+    "name": "Exchange Bag for ViUro® 500 Classic Urine Meter — KYD09-D",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD09-D.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                         150                              10"
+    ]
+  },
+  {
+    "code": "KYD09EBF",
+    "name": "Variant KYD09EBF",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD09EBF.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                         with cross valve                   10"
+    ]
+  },
+  {
+    "code": "KYD09EBF-1",
+    "name": "Variant KYD09EBF-1",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD09EBF-1.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "3500                                         with cross valve                   10"
+    ]
+  },
+  {
+    "code": "KYD10-C",
+    "name": "Exchange Bag for ViUro® 500 Classic Urine Meter — KYD10-C",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD10-C.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                         130                              10"
+    ]
+  },
+  {
+    "code": "KYD10EBF",
+    "name": "Exchange Bag for ViUro® 500 Plus Urine Meter — KYD10EBF",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD10EBF.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 with cross valve outlet                     10"
+    ]
+  },
+  {
+    "code": "KYD10EBF-1",
+    "name": "Exchange Bag for ViUro® 500 Plus Urine Meter — KYD10EBF-1",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD10EBF-1.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "3500                                  with cross valve outlet                     10"
+    ]
+  },
+  {
+    "code": "KYD11-C",
+    "name": "Exchange Bag for ViUro® 500 Plus Urine Meter — KYD11-C",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD11-C.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                         130                              10"
+    ]
+  },
+  {
+    "code": "KYD11-D",
+    "name": "Exchange Bag for ViUro® 500 Plus Urine Meter — KYD11-D",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD11-D.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                         150                              10"
+    ]
+  },
+  {
+    "code": "KYD11EBF",
+    "name": "Exchange Bag for ViUro® 500 Pro Urine Meter — KYD11EBF",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD11EBF.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 with cross valve                        10"
+    ]
+  },
+  {
+    "code": "KYD11EBF-1",
+    "name": "Exchange Bag for ViUro® 500 Pro Urine Meter — KYD11EBF-1",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD11EBF-1.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "3500                                 with cross valve                        10"
+    ]
+  },
+  {
+    "code": "KYD12-C",
+    "name": "Exchange Bag（3500ml） — KYD12-C",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD12-C.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                                                130                                                   10"
+    ]
+  },
+  {
+    "code": "KYD12-D",
+    "name": "Exchange Bag（3500ml） — KYD12-D",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD12-D.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 500                                                150                                                   10"
+    ]
+  },
+  {
+    "code": "KYD12EBF",
+    "name": "Exchange Bag for ViUro® 500 Smart Urine Meter — KYD12EBF",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD12EBF.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "2000                                 with reflix valve                                10"
+    ]
+  },
+  {
+    "code": "KYD12EBF-1",
+    "name": "Exchange Bag for ViUro® 500 Smart Urine Meter — KYD12EBF-1",
+    "category": "Urine Meters - Exchange Bags",
+    "description": "Catalogue reference KYD12EBF-1.",
+    "capacity": "",
+    "packaging": "",
+    "features": [
+      "3500                                  with reflix valve                                10"
+    ]
+  }
+]

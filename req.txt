@@ -1,0 +1,193 @@
+Automated Client & Product Management
+Platform
+Requirements Specification
+1. Project Objective
+Develop an AI-supported platform that automates client communication, product management,
+order processing, shipping coordination, and after-sales service.
+The goal is to:
+ Reduce repetitive work for sales teams
+ Improve client experience
+ Centralize all order and product information
+ Increase operational efficiency
+ Provide real-time visibility into orders and shipping
+The platform should be available as:
+ A web application
+ A mobile application (iOS & Android)
+2. User Roles
+2.1 Admin
+Responsible for:
+ Managing products
+ Managing users
+ Viewing analytics
+ Managing pricing by country
+ Tracking all orders
+ Configuring AI automation
+2.2 Sales Team
+Responsible for:
+ Managing client accounts
+ Following up on leads
+ Monitoring orders
+ Responding to after-sales requests
+ Viewing customer activity
+2.3 Client / Buyer
+Can:
+ Browse products
+ Request quotations
+ Place orders
+ Track orders and shipping
+ Submit complaints or returns
+ Access product documents
+3. Core Functional Requirements
+3.1 Authentication & User Management
+The system must allow:
+ User registration
+ Secure login/logout
+ Password reset
+ Role-based access control
+ Multi-language support
+ User profile management
+Optional:
+ Google/Microsoft login
+ Two-factor authentication (2FA) ( edhouma mafhemthemch )
+3.2 Product Catalog Management
+The platform must support:
+Product Information
+Each product should include:
+ Product name
+ Product code
+ Category
+ Description
+ Images/videos
+ Technical specifications
+ Available colors
+ Available sizes
+ Materials
+ Certifications
+ Model numbers
+
+Product Documents
+Upload/download:
+ Specification sheets
+ Instruction manuals
+ Compliance certificates
+ Packaging information
+Supported formats:
+ PDF
+ Excel
+ Images
+Pricing System
+The system must support:
+ Country-based pricing
+ Currency conversion
+ Volume discounts
+ Custom quotations
+ Price ranges
+ Promotional pricing
+( Maloumet al pricing quotation mandich )
+3.3 Product Selection & Ordering
+Clients must be able to:
+ Add products to cart
+ Select quantity
+ Select specifications
+ Choose packaging options
+ Add delivery instructions
+ Save draft orders
+ Submit quotation requests
+ Confirm orders
+3.4 Shipping & Logistics Module
+The system must support:
+Shipping Preferences
+Clients can choose:
+ FOB
+ CIF
+ DAP
+ Other Incoterms
+(l options they depend b kadeh mn in Incorterm L company mtena tetaamel bih )
+Shipping Features
+ Shipping cost estimation
+ Destination country selection
+ Freight tracking
+ Estimated delivery dates
+ Shipment status updates
+3.5 Order Tracking System
+The platform should provide real-time order visibility.
+Order Status Examples
+ Quote requested
+ Quote approved
+ Production started
+ In production
+ Quality check
+ Packed
+ Shipped
+ Delivered
+Tracking Features
+ Timeline view
+ Notifications
+ Delivery updates
+ Delay alerts
+3.6 AI Automation Features
+The AI module should automate repetitive sales tasks.
+AI Features
+ Automated client follow-ups
+ Email reminders
+ Quotation generation
+ Smart product recommendations
+ Auto-replies to common questions
+ Lead prioritization
+ Sales analytics
+Optional advanced AI:
+ Predictive demand forecasting
+ AI chatbot assistant
+ Voice assistant
+3.7 Notification System
+Notifications via:
+ Email
+ SMS
+ Push notifications
+ WhatsApp integration (optional)
+Triggers:
+ New order
+ Shipping updates
+ Payment reminders
+ Complaint updates
+ Follow-up reminders
+3.8 After-Sales Service Module
+Clients can:
+ Submit complaints
+ Request returns
+ Request replacements
+ Leave feedback
+ Upload images/documents
+The sales/admin team can:
+ Assign support tickets
+ Track ticket resolution
+ Communicate with clients
+ Monitor satisfaction metrics
+3.9 Dashboard & Analytics
+Admin Dashboard
+Should display:
+ Total orders
+ Revenue
+ Active clients
+ Product performance
+ Country sales statistics
+ Shipping performance
+ Complaint statistics
+Sales Dashboard
+Should display:
+ Pending follow-ups
+ Active quotations
+ Client activity
+ Upcoming tasks
+4. MVP (Minimum Viable Product)
+The MVP should focus on core functionality:
+MVP Features
+ User authentication
+ Product catalog
+ Product selection/cart
+ Quotation request
+ Order tracking
+ Basic dashboard
+ Client follow-up automation
+ Notifications
+ After-sales ticketing

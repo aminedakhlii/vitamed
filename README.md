@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Charles Platform
+
+Corporate B2B web application for client communication, product management, quotations, order tracking, and after-sales service.
+
+Built with **Next.js 16**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **SQLite**.
+
+## MVP Features
+
+- User authentication (register, login, password reset UI, role-based access)
+- Product catalog with specifications, documents, and country-based pricing
+- Shopping cart and quotation requests
+- Order tracking with timeline and status updates
+- Admin, sales, and client dashboards
+- AI client follow-up automation queue
+- In-app notification center
+- After-sales support ticketing
+
+## VITAIMED Catalogue Import
+
+Products from `VITAIMED--Catalogue.pdf` (from page 14) can be loaded into the database:
+
+```bash
+npm run db:parse-catalog    # Extract products → prisma/vitaimed-products.json
+npm run db:import-vitaimed  # Replace catalog products in the database
+```
+
+The catalogue PDF is also served at `/docs/VITAIMED--Catalogue.pdf` on each product’s documents tab. Pricing is set to **0** until you enter country prices in Admin → Manage Products.
+
+## Managing Products (Admin)
+
+1. Sign in as **admin@charles.com** / `admin123`
+2. Open **Manage Products** in the sidebar (or go to `/dashboard/admin/products`)
+3. Click **Add product** to create a new one, or **Edit** on an existing row
+4. Use **Deactivate** to hide a product from the catalog (soft delete)
+
+Sales and client accounts can browse the catalog but cannot add or edit products.
+
+## Demo Accounts
+
+| Role   | Email               | Password   |
+|--------|---------------------|------------|
+| Admin  | admin@charles.com   | admin123   |
+| Sales  | sales@charles.com   | sales123   |
+| Client | client@charles.com  | client123  |
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
+npm run db:setup
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` — Start development server
+- `npm run db:setup` — Run migrations and seed demo data
+- `npm run build` — Production build
 
-## Learn More
+## Requirements
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `docs/req.txt` for the full specification. Mobile app scope is excluded from this MVP.
