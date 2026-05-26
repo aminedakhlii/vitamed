@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getProductsWithRelations } from "@/lib/queries";
+import { newId, nowIso } from "@/lib/id";
 import { z } from "zod";
 
 const priceSchema = z.object({
@@ -29,11 +31,7 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const products = await prisma.product.findMany({
-    include: { countryPrices: true, documents: true },
-    orderBy: { name: "asc" },
-  });
-
+  const products = await getProductsWithRelations();
   return NextResponse.json(products);
 }
 
@@ -46,34 +44,48 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const data = productSchema.parse(body);
+    const supabase = getSupabase();
 
-    const existing = await prisma.product.findUnique({ where: { code: data.code } });
+    const { data: existing } = await supabase.from("Product").select("id").eq("code", data.code).maybeSingle();
     if (existing) {
       return NextResponse.json({ error: "Product code already exists" }, { status: 409 });
     }
 
-    const product = await prisma.product.create({
-      data: {
-        code: data.code,
-        name: data.name,
-        category: data.category,
-        description: data.description,
-        specifications: JSON.stringify(data.specifications || {}),
-        colors: JSON.stringify(data.colors || []),
-        sizes: JSON.stringify(data.sizes || []),
-        materials: data.materials || "",
-        certifications: data.certifications || "",
-        modelNumber: data.modelNumber,
-        imageUrl: data.imageUrl,
-        active: data.active ?? true,
-        countryPrices: data.countryPrices?.length
-          ? { create: data.countryPrices }
-          : undefined,
-      },
-      include: { countryPrices: true },
-    });
+    const now = nowIso();
+    const product = {
+      id: newId(),
+      code: data.code,
+      name: data.name,
+      category: data.category,
+      description: data.description,
+      specifications: JSON.stringify(data.specifications || {}),
+      colors: JSON.stringify(data.colors || []),
+      sizes: JSON.stringify(data.sizes || []),
+      materials: data.materials || "",
+      certifications: data.certifications || "",
+      modelNumber: data.modelNumber ?? null,
+      imageUrl: data.imageUrl ?? null,
+      active: data.active ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    return NextResponse.json(product, { status: 201 });
+    const { error } = await supabase.from("Product").insert(product);
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+    if (data.countryPrices?.length) {
+      await supabase.from("CountryPrice").insert(
+        data.countryPrices.map((p) => ({
+          id: newId(),
+          productId: product.id,
+          ...p,
+        }))
+      );
+    }
+
+    const full = await getProductsWithRelations();
+    const created = full.find((p) => p.id === product.id);
+    return NextResponse.json(created, { status: 201 });
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: e.issues[0]?.message || "Validation failed" }, { status: 400 });

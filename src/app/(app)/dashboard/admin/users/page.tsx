@@ -1,22 +1,13 @@
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 
 export default async function AdminUsersPage() {
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      company: true,
-      country: true,
-      language: true,
-      createdAt: true,
-    },
-  });
+  const { data: users } = await getSupabase()
+    .from("User")
+    .select("id, name, email, role, company, country, language, createdAt")
+    .order("createdAt", { ascending: false });
 
   return (
     <div>
@@ -26,7 +17,7 @@ export default async function AdminUsersPage() {
       </div>
 
       <Card>
-        <CardHeader title={`Users (${users.length})`} />
+        <CardHeader title={`Users (${users?.length || 0})`} />
         <CardBody className="p-0">
           <table className="data-table">
             <thead>
@@ -41,7 +32,7 @@ export default async function AdminUsersPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {(users || []).map((u) => (
                 <tr key={u.id}>
                   <td className="font-medium">{u.name}</td>
                   <td>{u.email}</td>

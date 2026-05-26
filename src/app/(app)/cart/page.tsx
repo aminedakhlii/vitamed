@@ -1,20 +1,16 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { CartActions } from "@/components/cart/cart-actions";
+import { getCartItemsWithProducts } from "@/lib/queries";
 import Link from "next/link";
 
 export default async function CartPage() {
   const session = await getSession();
   if (!session || session.role !== "CLIENT") redirect("/dashboard/client");
 
-  const items = await prisma.cartItem.findMany({
-    where: { userId: session.id },
-    include: { product: { include: { countryPrices: true } } },
-  });
-
+  const items = await getCartItemsWithProducts(session.id);
   const country = session.country || "US";
 
   return (
@@ -50,7 +46,7 @@ export default async function CartPage() {
                   </thead>
                   <tbody>
                     {items.map((item) => {
-                      const price = item.product.countryPrices.find((p) => p.country === country)
+                      const price = item.product.countryPrices.find((p: { country: string }) => p.country === country)
                         ?? item.product.countryPrices[0];
                       return (
                         <tr key={item.id}>

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { getProductsWithRelations } from "@/lib/queries";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -7,10 +7,7 @@ import { formatCurrency } from "@/lib/utils";
 import { ProductDeactivateButton } from "@/components/products/product-deactivate-button";
 
 export default async function AdminProductsPage() {
-  const products = await prisma.product.findMany({
-    include: { countryPrices: true },
-    orderBy: { name: "asc" },
-  });
+  const products = await getProductsWithRelations();
 
   return (
     <div>

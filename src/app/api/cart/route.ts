@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getCartItemsWithProducts } from "@/lib/queries";
+import { newId } from "@/lib/id";
 import { z } from "zod";
 
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const items = await prisma.cartItem.findMany({
-    where: { userId: session.id },
-    include: { product: { include: { countryPrices: true } } },
-  });
-
+  const items = await getCartItemsWithProducts(session.id);
   return NextResponse.json(items);
 }
 
@@ -30,29 +28,46 @@ export async function POST(request: Request) {
 
   try {
     const data = addSchema.parse(await request.json());
-    const existing = await prisma.cartItem.findFirst({
-      where: {
-        userId: session.id,
-        productId: data.productId,
-        color: data.color ?? null,
-        size: data.size ?? null,
-      },
-    });
+    const supabase = getSupabase();
+
+    let q = supabase
+      .from("CartItem")
+      .select("*")
+      .eq("userId", session.id)
+      .eq("productId", data.productId);
+    if (data.color) q = q.eq("color", data.color);
+    else q = q.is("color", null);
+    if (data.size) q = q.eq("size", data.size);
+    else q = q.is("size", null);
+
+    const { data: existing } = await q.maybeSingle();
 
     if (existing) {
-      const updated = await prisma.cartItem.update({
-        where: { id: existing.id },
-        data: { quantity: existing.quantity + data.quantity },
-        include: { product: true },
-      });
-      return NextResponse.json(updated);
+      const { data: updated, error } = await supabase
+        .from("CartItem")
+        .update({ quantity: existing.quantity + data.quantity })
+        .eq("id", existing.id)
+        .select("*")
+        .single();
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+      const { data: product } = await supabase.from("Product").select("*").eq("id", data.productId).single();
+      return NextResponse.json({ ...updated, product });
     }
 
-    const item = await prisma.cartItem.create({
-      data: { userId: session.id, ...data },
-      include: { product: true },
-    });
-    return NextResponse.json(item);
+    const row = {
+      id: newId(),
+      userId: session.id,
+      productId: data.productId,
+      quantity: data.quantity,
+      color: data.color ?? null,
+      size: data.size ?? null,
+      packaging: data.packaging ?? null,
+      deliveryNotes: data.deliveryNotes ?? null,
+    };
+    const { data: item, error } = await supabase.from("CartItem").insert(row).select("*").single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    const { data: product } = await supabase.from("Product").select("*").eq("id", data.productId).single();
+    return NextResponse.json({ ...item, product });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
@@ -66,6 +81,6 @@ export async function DELETE(request: Request) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  await prisma.cartItem.deleteMany({ where: { id, userId: session.id } });
+  await getSupabase().from("CartItem").delete().eq("id", id).eq("userId", session.id);
   return NextResponse.json({ success: true });
 }

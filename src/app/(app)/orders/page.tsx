@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getOrdersWithUsers } from "@/lib/queries";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -8,13 +8,7 @@ import { formatDate } from "@/lib/utils";
 
 export default async function OrdersPage() {
   const session = await getSession();
-  const where = session?.role === "CLIENT" ? { userId: session.id } : {};
-
-  const orders = await prisma.order.findMany({
-    where,
-    include: { user: { select: { name: true, company: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const orders = await getOrdersWithUsers(session?.role === "CLIENT" ? session.id : undefined);
 
   return (
     <div>
@@ -47,10 +41,10 @@ export default async function OrdersPage() {
                     </Link>
                   </td>
                   {session?.role !== "CLIENT" && (
-                    <td>{o.user.company || o.user.name}</td>
+                    <td>{o.user?.company || o.user?.name}</td>
                   )}
                   <td>
-                    <Badge variant="navy">{ORDER_STATUS_LABELS[o.status]}</Badge>
+                    <Badge variant="navy">{ORDER_STATUS_LABELS[o.status as keyof typeof ORDER_STATUS_LABELS]}</Badge>
                   </td>
                   <td>{o.incoterm || "—"}</td>
                   <td>{o.destinationCountry || "—"}</td>

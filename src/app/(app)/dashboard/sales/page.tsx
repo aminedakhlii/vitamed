@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
+import { getOrdersWithUsers } from "@/lib/queries";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -7,23 +8,31 @@ import { Button } from "@/components/ui/button";
 
 export default async function SalesDashboardPage() {
   const session = await getSession();
-  const [pendingQuotes, followUps, recentOrders, tickets] = await Promise.all([
-    prisma.quotation.count({ where: { status: "PENDING" } }),
-    prisma.followUp.count({ where: { completed: false, salesUserId: session?.id } }),
-    prisma.order.findMany({
-      take: 5,
-      orderBy: { updatedAt: "desc" },
-      include: { user: { select: { name: true, company: true } } },
-    }),
-    prisma.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
+  const supabase = getSupabase();
+
+  const [
+    { count: pendingQuotes },
+    { count: followUps },
+    { count: tickets },
+    recentOrders,
+    { data: automatedFollowUps },
+  ] = await Promise.all([
+    supabase.from("Quotation").select("*", { count: "exact", head: true }).eq("status", "PENDING"),
+    supabase.from("FollowUp").select("*", { count: "exact", head: true }).eq("completed", false).eq("salesUserId", session?.id || ""),
+    supabase.from("SupportTicket").select("*", { count: "exact", head: true }).in("status", ["OPEN", "IN_PROGRESS"]),
+    getOrdersWithUsers().then((o) => o.slice(0, 5)),
+    supabase
+      .from("FollowUp")
+      .select("*")
+      .eq("completed", false)
+      .eq("automated", true)
+      .order("scheduledAt", { ascending: true })
+      .limit(5),
   ]);
 
-  const automatedFollowUps = await prisma.followUp.findMany({
-    where: { completed: false, automated: true },
-    take: 5,
-    include: { client: { select: { name: true } } },
-    orderBy: { scheduledAt: "asc" },
-  });
+  const clientIds = [...new Set((automatedFollowUps || []).map((f) => f.clientId))];
+  const { data: clients } = await supabase.from("User").select("id, name").in("id", clientIds);
+  const clientMap = new Map((clients || []).map((c) => [c.id, c]));
 
   return (
     <div>
@@ -34,10 +43,10 @@ export default async function SalesDashboardPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Pending Quotations", value: pendingQuotes },
-          { label: "My Follow-ups", value: followUps },
-          { label: "Open Tickets", value: tickets },
-          { label: "AI Automations", value: automatedFollowUps.length },
+          { label: "Pending Quotations", value: pendingQuotes || 0 },
+          { label: "My Follow-ups", value: followUps || 0 },
+          { label: "Open Tickets", value: tickets || 0 },
+          { label: "AI Automations", value: automatedFollowUps?.length || 0 },
         ].map((s) => (
           <div key={s.label} className="stat-card">
             <p className="label">{s.label}</p>
@@ -54,14 +63,14 @@ export default async function SalesDashboardPage() {
             action={<Link href="/follow-ups"><Button variant="outline" size="sm">Manage</Button></Link>}
           />
           <CardBody className="space-y-3">
-            {automatedFollowUps.length === 0 ? (
+            {!automatedFollowUps?.length ? (
               <p className="text-sm text-slate-500">No pending automated follow-ups.</p>
             ) : (
               automatedFollowUps.map((f) => (
                 <div key={f.id} className="flex justify-between items-start py-2 border-b border-slate-100 last:border-0">
                   <div>
                     <p className="text-sm font-medium text-slate-900">{f.subject}</p>
-                    <p className="text-xs text-slate-500">{f.client.name} · {f.type}</p>
+                    <p className="text-xs text-slate-500">{clientMap.get(f.clientId)?.name} · {f.type}</p>
                   </div>
                   <Badge variant="info">AI</Badge>
                 </div>
@@ -89,7 +98,7 @@ export default async function SalesDashboardPage() {
                         {o.orderNumber}
                       </Link>
                     </td>
-                    <td>{o.user.company || o.user.name}</td>
+                    <td>{o.user?.company || o.user?.name}</td>
                     <td>
                       <Badge variant="navy">{o.status.replace(/_/g, " ")}</Badge>
                     </td>

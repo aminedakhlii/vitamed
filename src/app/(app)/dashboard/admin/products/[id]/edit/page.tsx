@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { getProductById } from "@/lib/queries";
 import { notFound } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ProductForm } from "@/components/products/product-form";
@@ -11,12 +11,13 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { countryPrices: true },
-  });
 
-  if (!product) notFound();
+  let product;
+  try {
+    product = await getProductById(id);
+  } catch {
+    notFound();
+  }
 
   const initial = productToFormDefaults({ ...product, id: product.id });
 

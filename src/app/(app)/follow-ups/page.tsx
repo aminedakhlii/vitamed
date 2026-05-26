@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,13 +13,23 @@ export default async function FollowUpsPage() {
     redirect("/dashboard/client");
   }
 
-  const followUps = await prisma.followUp.findMany({
-    include: {
-      client: { select: { name: true, email: true, company: true } },
-      salesUser: { select: { name: true } },
-    },
-    orderBy: { scheduledAt: "asc" },
-  });
+  const { data: followUps } = await getSupabase()
+    .from("FollowUp")
+    .select("*")
+    .order("scheduledAt", { ascending: true });
+
+  const clientIds = [...new Set((followUps || []).map((f) => f.clientId))];
+  const salesIds = [...new Set((followUps || []).map((f) => f.salesUserId).filter(Boolean))] as string[];
+  const { data: clients } = await getSupabase()
+    .from("User")
+    .select("id, name, email, company")
+    .in("id", clientIds);
+  const { data: sales } = salesIds.length
+    ? await getSupabase().from("User").select("id, name").in("id", salesIds)
+    : { data: [] };
+
+  const clientMap = new Map((clients || []).map((c) => [c.id, c]));
+  const salesMap = new Map((sales || []).map((s) => [s.id, s]));
 
   return (
     <div>
@@ -35,9 +45,9 @@ export default async function FollowUpsPage() {
 
       <div className="grid md:grid-cols-3 gap-4 mb-8">
         {[
-          { label: "Pending", value: followUps.filter((f) => !f.completed).length },
-          { label: "Automated", value: followUps.filter((f) => f.automated && !f.completed).length },
-          { label: "Completed", value: followUps.filter((f) => f.completed).length },
+          { label: "Pending", value: (followUps || []).filter((f) => !f.completed).length },
+          { label: "Automated", value: (followUps || []).filter((f) => f.automated && !f.completed).length },
+          { label: "Completed", value: (followUps || []).filter((f) => f.completed).length },
         ].map((s) => (
           <div key={s.label} className="stat-card">
             <p className="label">{s.label}</p>
@@ -49,7 +59,7 @@ export default async function FollowUpsPage() {
       <Card>
         <CardHeader title="Follow-up Queue" description="Automated and manual client touchpoints" />
         <CardBody className="space-y-4">
-          {followUps.map((f) => (
+          {(followUps || []).map((f) => (
             <div
               key={f.id}
               className="flex items-start justify-between gap-4 p-4 border border-slate-200 rounded-lg"
@@ -62,9 +72,9 @@ export default async function FollowUpsPage() {
                 </div>
                 <p className="text-sm text-slate-600">{f.message}</p>
                 <p className="text-xs text-slate-500 mt-2">
-                  Client: {f.client.company || f.client.name} · Type: {f.type} ·
+                  Client: {clientMap.get(f.clientId)?.company || clientMap.get(f.clientId)?.name} · Type: {f.type} ·
                   Scheduled: {formatDate(f.scheduledAt)}
-                  {f.salesUser && ` · Sales: ${f.salesUser.name}`}
+                  {f.salesUserId && salesMap.get(f.salesUserId) && ` · Sales: ${salesMap.get(f.salesUserId)?.name}`}
                 </p>
               </div>
               {!f.completed && <FollowUpActions followUpId={f.id} />}

@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getOrderById } from "@/lib/queries";
 import { notFound } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { ORDER_STATUS_LABELS } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { OrderStatusActions } from "@/components/orders/order-status-actions";
+import type { OrderStatus } from "@/lib/types";
 
 export default async function OrderDetailPage({
   params,
@@ -17,15 +18,13 @@ export default async function OrderDetailPage({
   const { id } = await params;
   const session = await getSession();
 
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: {
-      user: { select: { name: true, company: true, email: true } },
-      statusHistory: { orderBy: { createdAt: "asc" } },
-    },
-  });
+  let order;
+  try {
+    order = await getOrderById(id);
+  } catch {
+    notFound();
+  }
 
-  if (!order) notFound();
   if (session?.role === "CLIENT" && order.userId !== session.id) notFound();
 
   const items = JSON.parse(order.items) as {
@@ -44,11 +43,11 @@ export default async function OrderDetailPage({
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{order.orderNumber}</h1>
           <p className="text-slate-500 mt-1">
-            {session?.role !== "CLIENT" && `${order.user.company || order.user.name} · `}
+            {session?.role !== "CLIENT" && `${order.user?.company || order.user?.name} · `}
             Created {formatDate(order.createdAt)}
           </p>
         </div>
-        <Badge variant="navy">{ORDER_STATUS_LABELS[order.status]}</Badge>
+        <Badge variant="navy">{ORDER_STATUS_LABELS[order.status as OrderStatus]}</Badge>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -57,8 +56,12 @@ export default async function OrderDetailPage({
             <CardHeader title="Order Timeline" description="Real-time production and shipping updates" />
             <CardBody>
               <OrderTimeline
-                currentStatus={order.status}
-                history={order.statusHistory}
+                currentStatus={order.status as OrderStatus}
+                history={order.statusHistory.map((h) => ({
+                  status: h.status as OrderStatus,
+                  note: h.note,
+                  createdAt: new Date(h.createdAt),
+                }))}
               />
             </CardBody>
           </Card>
@@ -129,7 +132,7 @@ export default async function OrderDetailPage({
             <Card>
               <CardHeader title="Update Status" description="Advance order through production pipeline" />
               <CardBody>
-                <OrderStatusActions orderId={order.id} currentStatus={order.status} />
+                <OrderStatusActions orderId={order.id} currentStatus={order.status as OrderStatus} />
               </CardBody>
             </Card>
           )}

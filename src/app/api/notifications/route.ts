@@ -1,18 +1,20 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const notifications = await prisma.notification.findMany({
-    where: { userId: session.id },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const { data, error } = await getSupabase()
+    .from("Notification")
+    .select("*")
+    .eq("userId", session.id)
+    .order("createdAt", { ascending: false })
+    .limit(50);
 
-  return NextResponse.json(notifications);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
 }
 
 export async function PATCH(request: Request) {
@@ -20,20 +22,15 @@ export async function PATCH(request: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id, markAll } = await request.json();
+  const supabase = getSupabase();
 
   if (markAll) {
-    await prisma.notification.updateMany({
-      where: { userId: session.id, read: false },
-      data: { read: true },
-    });
+    await supabase.from("Notification").update({ read: true }).eq("userId", session.id);
     return NextResponse.json({ success: true });
   }
 
   if (id) {
-    await prisma.notification.updateMany({
-      where: { id, userId: session.id },
-      data: { read: true },
-    });
+    await supabase.from("Notification").update({ read: true }).eq("id", id).eq("userId", session.id);
   }
 
   return NextResponse.json({ success: true });

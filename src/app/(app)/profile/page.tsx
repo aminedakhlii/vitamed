@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ProfileForm } from "@/components/profile/profile-form";
 
@@ -7,7 +7,7 @@ export default async function ProfilePage() {
   const session = await getSession();
   if (!session) return null;
 
-  const user = await prisma.user.findUnique({ where: { id: session.id } });
+  const { data: user } = await getSupabase().from("User").select("*").eq("id", session.id).single();
   if (!user) return null;
 
   return (

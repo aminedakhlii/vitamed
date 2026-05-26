@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { NotificationList } from "@/components/notifications/notification-list";
 
@@ -7,12 +7,13 @@ export default async function NotificationsPage() {
   const session = await getSession();
   if (!session) return null;
 
-  const notifications = await prisma.notification.findMany({
-    where: { userId: session.id },
-    orderBy: { createdAt: "desc" },
-  });
+  const { data: notifications } = await getSupabase()
+    .from("Notification")
+    .select("*")
+    .eq("userId", session.id)
+    .order("createdAt", { ascending: false });
 
-  const unread = notifications.filter((n) => !n.read).length;
+  const unread = (notifications || []).filter((n) => !n.read).length;
 
   return (
     <div>
@@ -26,15 +27,10 @@ export default async function NotificationsPage() {
       <Card>
         <CardHeader title="Notification Center" description="Email, SMS, and in-app alerts (MVP: in-app)" />
         <CardBody>
-          {notifications.length === 0 ? (
+          {!notifications?.length ? (
             <p className="text-sm text-slate-500">No notifications yet.</p>
           ) : (
-            <NotificationList
-              initial={notifications.map((n) => ({
-                ...n,
-                createdAt: n.createdAt.toISOString(),
-              }))}
-            />
+            <NotificationList initial={notifications} />
           )}
         </CardBody>
       </Card>

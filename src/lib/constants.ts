@@ -1,4 +1,4 @@
-import type { OrderStatus } from "@prisma/client";
+import type { OrderStatus } from "@/lib/types";
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   QUOTE_REQUESTED: "Quote Requested",

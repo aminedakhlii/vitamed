@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { nowIso } from "@/lib/id";
 import { z } from "zod";
 
 const schema = z.object({
@@ -17,16 +18,21 @@ export async function PATCH(request: Request) {
 
   try {
     const data = schema.parse(await request.json());
-    const user = await prisma.user.update({
-      where: { id: session.id },
-      data: {
+    const { data: user, error } = await getSupabase()
+      .from("User")
+      .update({
         name: data.name,
-        company: data.company,
-        phone: data.phone,
-        country: data.country,
+        company: data.company ?? null,
+        phone: data.phone ?? null,
+        country: data.country ?? null,
         language: data.language,
-      },
-    });
+        updatedAt: nowIso(),
+      })
+      .eq("id", session.id)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     return NextResponse.json(user);
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });

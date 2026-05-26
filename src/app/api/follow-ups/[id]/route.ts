@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
 export async function PATCH(
@@ -14,10 +14,13 @@ export async function PATCH(
   const { id } = await params;
   const { completed } = await request.json();
 
-  const followUp = await prisma.followUp.update({
-    where: { id },
-    data: { completed: !!completed },
-  });
+  const { data, error } = await getSupabase()
+    .from("FollowUp")
+    .update({ completed: !!completed })
+    .eq("id", id)
+    .select()
+    .single();
 
-  return NextResponse.json(followUp);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json(data);
 }

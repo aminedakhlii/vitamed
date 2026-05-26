@@ -1,8 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
-import { prisma } from "./db";
-import type { Role } from "@prisma/client";
+import { getSupabase } from "./db";
+import type { NotificationType, Role } from "./types";
 
 const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "charles-platform-dev-secret"
@@ -97,9 +97,21 @@ export async function createNotification(
   userId: string,
   title: string,
   message: string,
-  type: "ORDER" | "SHIPPING" | "PAYMENT" | "COMPLAINT" | "FOLLOW_UP" | "SYSTEM" = "SYSTEM"
+  type: NotificationType = "SYSTEM"
 ) {
-  return prisma.notification.create({
-    data: { userId, title, message, type },
-  });
+  const { data, error } = await getSupabase()
+    .from("Notification")
+    .insert({
+      id: crypto.randomUUID(),
+      userId,
+      title,
+      message,
+      type,
+      read: false,
+      createdAt: new Date().toISOString(),
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }

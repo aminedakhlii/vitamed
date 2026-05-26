@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { createSession, hashPassword, roleDashboardPath } from "@/lib/auth";
+import { newId, nowIso } from "@/lib/id";
+import type { Role } from "@/lib/types";
 import { z } from "zod";
 
 const schema = z.object({
@@ -17,22 +19,35 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = schema.parse(body);
 
-    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+    const { data: existing } = await getSupabase()
+      .from("User")
+      .select("id")
+      .eq("email", data.email)
+      .maybeSingle();
+
     if (existing) {
       return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
 
-    const user = await prisma.user.create({
-      data: {
-        email: data.email,
-        passwordHash: await hashPassword(data.password),
-        name: data.name,
-        role: "CLIENT",
-        company: data.company,
-        country: data.country,
-        language: data.language,
-      },
-    });
+    const now = nowIso();
+    const user = {
+      id: newId(),
+      email: data.email,
+      passwordHash: await hashPassword(data.password),
+      name: data.name,
+      role: "CLIENT" as Role,
+      company: data.company ?? null,
+      country: data.country ?? null,
+      language: data.language,
+      phone: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const { error } = await getSupabase().from("User").insert(user);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
 
     const sessionUser = {
       id: user.id,

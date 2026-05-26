@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TicketForm } from "@/components/support/ticket-form";
@@ -7,16 +7,19 @@ import { formatDate } from "@/lib/utils";
 
 export default async function SupportPage() {
   const session = await getSession();
-  const where = session?.role === "CLIENT" ? { userId: session.id } : {};
+  const supabase = getSupabase();
 
-  const tickets = await prisma.supportTicket.findMany({
-    where,
-    include: {
-      user: { select: { name: true, company: true } },
-      assignedTo: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  let q = supabase.from("SupportTicket").select("*").order("createdAt", { ascending: false });
+  if (session?.role === "CLIENT") q = q.eq("userId", session!.id);
+  const { data: tickets } = await q;
+
+  const userIds = new Set<string>();
+  for (const t of tickets || []) {
+    userIds.add(t.userId);
+    if (t.assignedToId) userIds.add(t.assignedToId);
+  }
+  const { data: users } = await supabase.from("User").select("id, name, company").in("id", [...userIds]);
+  const userMap = new Map((users || []).map((u) => [u.id, u]));
 
   const statusVariant: Record<string, "default" | "warning" | "success" | "danger" | "info"> = {
     OPEN: "warning",
@@ -44,7 +47,7 @@ export default async function SupportPage() {
 
         <div className={session?.role === "CLIENT" ? "lg:col-span-2" : "lg:col-span-3"}>
           <Card>
-            <CardHeader title={`Tickets (${tickets.length})`} />
+            <CardHeader title={`Tickets (${tickets?.length || 0})`} />
             <CardBody className="p-0">
               <table className="data-table">
                 <thead>
@@ -59,11 +62,11 @@ export default async function SupportPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {tickets.map((t) => (
+                  {(tickets || []).map((t) => (
                     <tr key={t.id}>
                       <td className="font-medium">{t.ticketNumber}</td>
                       {session?.role !== "CLIENT" && (
-                        <td>{t.user.company || t.user.name}</td>
+                        <td>{userMap.get(t.userId)?.company || userMap.get(t.userId)?.name}</td>
                       )}
                       <td>
                         <Badge variant="default">{t.type}</Badge>
@@ -74,7 +77,7 @@ export default async function SupportPage() {
                           {t.status.replace(/_/g, " ")}
                         </Badge>
                       </td>
-                      <td>{t.assignedTo?.name || "Unassigned"}</td>
+                      <td>{t.assignedToId ? userMap.get(t.assignedToId)?.name : "Unassigned"}</td>
                       <td>{formatDate(t.createdAt)}</td>
                     </tr>
                   ))}

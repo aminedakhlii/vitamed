@@ -1,18 +1,20 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 
 export default async function QuotationsPage() {
   const session = await getSession();
-  const where = session?.role === "CLIENT" ? { userId: session.id } : {};
+  const supabase = getSupabase();
 
-  const quotations = await prisma.quotation.findMany({
-    where,
-    include: { user: { select: { name: true, company: true, email: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  let q = supabase.from("Quotation").select("*").order("createdAt", { ascending: false });
+  if (session?.role === "CLIENT") q = q.eq("userId", session!.id);
+  const { data: quotations } = await q;
+
+  const userIds = [...new Set((quotations || []).map((x) => x.userId))];
+  const { data: users } = await supabase.from("User").select("id, name, company, email").in("id", userIds);
+  const userMap = new Map((users || []).map((u) => [u.id, u]));
 
   const statusVariant: Record<string, "default" | "warning" | "success" | "danger" | "info"> = {
     DRAFT: "default",
@@ -29,7 +31,7 @@ export default async function QuotationsPage() {
       </div>
 
       <Card>
-        <CardHeader title={`Quotations (${quotations.length})`} />
+        <CardHeader title={`Quotations (${quotations?.length || 0})`} />
         <CardBody className="p-0">
           <table className="data-table">
             <thead>
@@ -44,13 +46,14 @@ export default async function QuotationsPage() {
               </tr>
             </thead>
             <tbody>
-              {quotations.map((q) => {
+              {(quotations || []).map((q) => {
                 const items = JSON.parse(q.items) as { name: string; quantity: number }[];
+                const user = userMap.get(q.userId);
                 return (
                   <tr key={q.id}>
                     <td className="font-mono text-xs">{q.id.slice(0, 8)}…</td>
                     {session?.role !== "CLIENT" && (
-                      <td>{q.user.company || q.user.name}</td>
+                      <td>{user?.company || user?.name}</td>
                     )}
                     <td>
                       <Badge variant={statusVariant[q.status] || "default"}>

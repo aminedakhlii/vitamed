@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getProductById } from "@/lib/queries";
+import { newId, nowIso } from "@/lib/id";
 import { z } from "zod";
 
 const priceSchema = z.object({
@@ -30,13 +32,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { countryPrices: true, documents: true },
-  });
-
-  if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(product);
+  try {
+    const product = await getProductById(id);
+    return NextResponse.json(product);
+  } catch {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 }
 
 export async function PATCH(
@@ -53,44 +54,47 @@ export async function PATCH(
   try {
     const body = await request.json();
     const data = productSchema.parse(body);
+    const supabase = getSupabase();
 
     if (data.code) {
-      const duplicate = await prisma.product.findFirst({
-        where: { code: data.code, NOT: { id } },
-      });
+      const { data: duplicate } = await supabase
+        .from("Product")
+        .select("id")
+        .eq("code", data.code)
+        .neq("id", id)
+        .maybeSingle();
       if (duplicate) {
         return NextResponse.json({ error: "Product code already in use" }, { status: 409 });
       }
     }
 
     if (data.countryPrices) {
-      await prisma.countryPrice.deleteMany({ where: { productId: id } });
-      await prisma.countryPrice.createMany({
-        data: data.countryPrices.map((p) => ({ ...p, productId: id })),
-      });
+      await supabase.from("CountryPrice").delete().eq("productId", id);
+      if (data.countryPrices.length) {
+        await supabase.from("CountryPrice").insert(
+          data.countryPrices.map((p) => ({ id: newId(), productId: id, ...p }))
+        );
+      }
     }
 
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        ...(data.code !== undefined && { code: data.code }),
-        ...(data.name !== undefined && { name: data.name }),
-        ...(data.category !== undefined && { category: data.category }),
-        ...(data.description !== undefined && { description: data.description }),
-        ...(data.specifications !== undefined && {
-          specifications: JSON.stringify(data.specifications),
-        }),
-        ...(data.colors !== undefined && { colors: JSON.stringify(data.colors) }),
-        ...(data.sizes !== undefined && { sizes: JSON.stringify(data.sizes) }),
-        ...(data.materials !== undefined && { materials: data.materials }),
-        ...(data.certifications !== undefined && { certifications: data.certifications }),
-        ...(data.modelNumber !== undefined && { modelNumber: data.modelNumber }),
-        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
-        ...(data.active !== undefined && { active: data.active }),
-      },
-      include: { countryPrices: true },
-    });
+    const updates: Record<string, unknown> = { updatedAt: nowIso() };
+    if (data.code !== undefined) updates.code = data.code;
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.category !== undefined) updates.category = data.category;
+    if (data.description !== undefined) updates.description = data.description;
+    if (data.specifications !== undefined) updates.specifications = JSON.stringify(data.specifications);
+    if (data.colors !== undefined) updates.colors = JSON.stringify(data.colors);
+    if (data.sizes !== undefined) updates.sizes = JSON.stringify(data.sizes);
+    if (data.materials !== undefined) updates.materials = data.materials;
+    if (data.certifications !== undefined) updates.certifications = data.certifications;
+    if (data.modelNumber !== undefined) updates.modelNumber = data.modelNumber;
+    if (data.imageUrl !== undefined) updates.imageUrl = data.imageUrl;
+    if (data.active !== undefined) updates.active = data.active;
 
+    const { error } = await supabase.from("Product").update(updates).eq("id", id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+    const product = await getProductById(id);
     return NextResponse.json(product);
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -107,11 +111,6 @@ export async function DELETE(
   }
 
   const { id } = await params;
-
-  await prisma.product.update({
-    where: { id },
-    data: { active: false },
-  });
-
+  await getSupabase().from("Product").update({ active: false, updatedAt: nowIso() }).eq("id", id);
   return NextResponse.json({ success: true });
 }

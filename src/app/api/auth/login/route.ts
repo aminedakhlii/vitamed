@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { createSession, verifyPassword, roleDashboardPath } from "@/lib/auth";
+import type { Role } from "@/lib/types";
 import { z } from "zod";
 
 const schema = z.object({
@@ -13,8 +14,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = schema.parse(body);
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    const { data: user, error } = await getSupabase()
+      .from("User")
+      .select("*")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (error || !user || !(await verifyPassword(password, user.passwordHash))) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
@@ -22,7 +28,7 @@ export async function POST(request: Request) {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      role: user.role as Role,
       language: user.language,
       country: user.country,
     };
@@ -31,7 +37,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       user: sessionUser,
-      redirect: roleDashboardPath(user.role),
+      redirect: roleDashboardPath(user.role as Role),
     });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });

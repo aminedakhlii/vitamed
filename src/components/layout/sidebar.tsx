@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import type { Role } from "@prisma/client";
+import type { Role } from "@/lib/types";
 import {
   LayoutDashboard,
   Package,

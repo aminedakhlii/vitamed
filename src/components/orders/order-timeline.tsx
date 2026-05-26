@@ -1,5 +1,5 @@
 import { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS } from "@/lib/constants";
-import type { OrderStatus } from "@prisma/client";
+import type { OrderStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 

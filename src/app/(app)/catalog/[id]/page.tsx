@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getProductById } from "@/lib/queries";
 import { notFound } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,15 +15,16 @@ export default async function ProductDetailPage({
 }) {
   const { id } = await params;
   const session = await getSession();
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { countryPrices: true, documents: true },
-  });
 
-  if (!product) notFound();
+  let product;
+  try {
+    product = await getProductById(id);
+  } catch {
+    notFound();
+  }
 
   const country = session?.country || "US";
-  const price = product.countryPrices.find((p) => p.country === country) ?? product.countryPrices[0];
+  const price = product.countryPrices.find((p: { country: string; price: number; currency: string }) => p.country === country) ?? product.countryPrices[0];
   const colors = parseJsonArray<string>(product.colors);
   const sizes = parseJsonArray<string>(product.sizes);
   const specs = JSON.parse(product.specifications || "{}") as Record<string, string>;

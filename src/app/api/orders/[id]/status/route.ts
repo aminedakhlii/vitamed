@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
 import { getSession, createNotification } from "@/lib/auth";
+import { newId, nowIso } from "@/lib/id";
+import type { OrderStatus } from "@/lib/types";
 import { z } from "zod";
-import type { OrderStatus } from "@prisma/client";
 
 const schema = z.object({
   status: z.enum([
@@ -31,15 +32,25 @@ export async function PATCH(
 
   try {
     const { status, note } = schema.parse(await request.json());
+    const supabase = getSupabase();
 
-    const order = await prisma.order.update({
-      where: { id },
-      data: { status: status as OrderStatus },
-      include: { user: true },
-    });
+    const { data: order, error } = await supabase
+      .from("Order")
+      .update({ status, updatedAt: nowIso() })
+      .eq("id", id)
+      .select()
+      .single();
 
-    await prisma.orderStatusHistory.create({
-      data: { orderId: id, status: status as OrderStatus, note },
+    if (error || !order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    await supabase.from("OrderStatusHistory").insert({
+      id: newId(),
+      orderId: id,
+      status: status as OrderStatus,
+      note: note ?? null,
+      createdAt: nowIso(),
     });
 
     const type = status === "SHIPPED" ? "SHIPPING" : "ORDER";

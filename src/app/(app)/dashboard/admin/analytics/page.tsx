@@ -1,28 +1,32 @@
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
+import { getProductsWithRelations } from "@/lib/queries";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { COUNTRIES } from "@/lib/constants";
 
 export default async function AnalyticsPage() {
-  const [orders, products, tickets] = await Promise.all([
-    prisma.order.findMany({ include: { user: { select: { country: true } } } }),
-    prisma.product.findMany({ include: { countryPrices: true } }),
-    prisma.supportTicket.groupBy({ by: ["status"], _count: true }),
-  ]);
+  const supabase = getSupabase();
+
+  const { data: orders } = await supabase.from("Order").select("*");
+  const products = await getProductsWithRelations();
+  const { data: tickets } = await supabase.from("SupportTicket").select("status");
+
+  const userIds = [...new Set((orders || []).map((o) => o.userId))];
+  const { data: users } = await supabase.from("User").select("id, country").in("id", userIds);
+  const userCountryMap = new Map((users || []).map((u) => [u.id, u.country]));
 
   const countrySales: Record<string, number> = {};
-  for (const o of orders) {
-    const country = o.destinationCountry || o.user.country || "Unknown";
+  for (const o of orders || []) {
+    const country = o.destinationCountry || userCountryMap.get(o.userId) || "Unknown";
     const items = JSON.parse(o.items) as { quantity: number; unitPrice?: number }[];
     const total = items.reduce((s, i) => s + (i.unitPrice || 0) * i.quantity, 0);
     countrySales[country] = (countrySales[country] || 0) + total;
   }
 
-  const productPerformance = products.map((p) => ({
-    name: p.name,
-    category: p.category,
-    priceCount: p.countryPrices.length,
-  }));
+  const ticketStats: Record<string, number> = {};
+  for (const t of tickets || []) {
+    ticketStats[t.status] = (ticketStats[t.status] || 0) + 1;
+  }
 
   return (
     <div>
@@ -60,10 +64,10 @@ export default async function AnalyticsPage() {
         <Card>
           <CardHeader title="Complaint Statistics" />
           <CardBody className="space-y-3">
-            {tickets.map((t) => (
-              <div key={t.status} className="flex justify-between text-sm">
-                <span className="text-slate-600">{t.status.replace(/_/g, " ")}</span>
-                <span className="font-bold text-[#1e3a5f]">{t._count}</span>
+            {Object.entries(ticketStats).map(([status, count]) => (
+              <div key={status} className="flex justify-between text-sm">
+                <span className="text-slate-600">{status.replace(/_/g, " ")}</span>
+                <span className="font-bold text-[#1e3a5f]">{count}</span>
               </div>
             ))}
           </CardBody>
@@ -81,11 +85,11 @@ export default async function AnalyticsPage() {
                 </tr>
               </thead>
               <tbody>
-                {productPerformance.map((p) => (
-                  <tr key={p.name}>
+                {products.map((p) => (
+                  <tr key={p.id}>
                     <td className="font-medium">{p.name}</td>
                     <td>{p.category}</td>
-                    <td>{p.priceCount}</td>
+                    <td>{p.countryPrices.length}</td>
                   </tr>
                 ))}
               </tbody>

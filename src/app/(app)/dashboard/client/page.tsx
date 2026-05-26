@@ -1,29 +1,37 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
+import { getOrdersWithUsers } from "@/lib/queries";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ORDER_STATUS_LABELS } from "@/lib/constants";
+import type { OrderStatus } from "@/lib/types";
 
 export default async function ClientDashboardPage() {
   const session = await getSession();
   if (!session) return null;
 
-  const [orders, quotations, cartCount, unreadNotifs] = await Promise.all([
-    prisma.order.findMany({
-      where: { userId: session.id },
-      take: 3,
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.quotation.findMany({
-      where: { userId: session.id },
-      take: 3,
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.cartItem.count({ where: { userId: session.id } }),
-    prisma.notification.count({ where: { userId: session.id, read: false } }),
-  ]);
+  const supabase = getSupabase();
+  const orders = (await getOrdersWithUsers(session.id)).slice(0, 3);
+
+  const { data: quotations } = await supabase
+    .from("Quotation")
+    .select("*")
+    .eq("userId", session.id)
+    .order("createdAt", { ascending: false })
+    .limit(3);
+
+  const { count: cartCount } = await supabase
+    .from("CartItem")
+    .select("*", { count: "exact", head: true })
+    .eq("userId", session.id);
+
+  const { count: unreadNotifs } = await supabase
+    .from("Notification")
+    .select("*", { count: "exact", head: true })
+    .eq("userId", session.id)
+    .eq("read", false);
 
   return (
     <div>
@@ -35,9 +43,9 @@ export default async function ClientDashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { label: "Active Orders", value: orders.length },
-          { label: "Cart Items", value: cartCount },
-          { label: "Quotations", value: quotations.length },
-          { label: "Unread Notifications", value: unreadNotifs },
+          { label: "Cart Items", value: cartCount || 0 },
+          { label: "Quotations", value: quotations?.length || 0 },
+          { label: "Unread Notifications", value: unreadNotifs || 0 },
         ].map((s) => (
           <div key={s.label} className="stat-card">
             <p className="label">{s.label}</p>
@@ -64,7 +72,7 @@ export default async function ClientDashboardPage() {
                 >
                   <div>
                     <p className="text-sm font-medium text-[#1e3a5f]">{o.orderNumber}</p>
-                    <p className="text-xs text-slate-500">{ORDER_STATUS_LABELS[o.status]}</p>
+                    <p className="text-xs text-slate-500">{ORDER_STATUS_LABELS[o.status as OrderStatus]}</p>
                   </div>
                   {o.trackingNumber && (
                     <Badge variant="info">{o.trackingNumber}</Badge>
@@ -76,13 +84,10 @@ export default async function ClientDashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader
-            title="Quick Actions"
-            description="Common tasks"
-          />
+          <CardHeader title="Quick Actions" description="Common tasks" />
           <CardBody className="flex flex-col gap-3">
             <Link href="/catalog"><Button className="w-full justify-center">Browse Product Catalog</Button></Link>
-            <Link href="/cart"><Button variant="outline" className="w-full justify-center">View Cart ({cartCount})</Button></Link>
+            <Link href="/cart"><Button variant="outline" className="w-full justify-center">View Cart ({cartCount || 0})</Button></Link>
             <Link href="/support"><Button variant="outline" className="w-full justify-center">Submit Support Request</Button></Link>
           </CardBody>
         </Card>

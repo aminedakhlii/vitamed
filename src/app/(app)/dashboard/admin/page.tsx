@@ -1,4 +1,5 @@
-import { prisma } from "@/lib/db";
+import { getSupabase } from "@/lib/db";
+import { getOrdersWithUsers } from "@/lib/queries";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,30 +7,45 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default async function AdminDashboardPage() {
-  const [orderCount, clientCount, productCount, ticketCount, orders, tickets] = await Promise.all([
-    prisma.order.count(),
-    prisma.user.count({ where: { role: "CLIENT" } }),
-    prisma.product.count({ where: { active: true } }),
-    prisma.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
-    prisma.order.findMany({ take: 5, orderBy: { createdAt: "desc" }, include: { user: { select: { name: true } } } }),
-    prisma.supportTicket.findMany({
-      where: { status: { in: ["OPEN", "IN_PROGRESS"] } },
-      take: 5,
-      include: { user: { select: { name: true } } },
-    }),
+  const supabase = getSupabase();
+
+  const [
+    { count: orderCount },
+    { count: clientCount },
+    { count: productCount },
+    { count: ticketCount },
+    orders,
+    { data: tickets },
+  ] = await Promise.all([
+    supabase.from("Order").select("*", { count: "exact", head: true }),
+    supabase.from("User").select("*", { count: "exact", head: true }).eq("role", "CLIENT"),
+    supabase.from("Product").select("*", { count: "exact", head: true }).eq("active", true),
+    supabase.from("SupportTicket").select("*", { count: "exact", head: true }).in("status", ["OPEN", "IN_PROGRESS"]),
+    getOrdersWithUsers(),
+    supabase
+      .from("SupportTicket")
+      .select("*")
+      .in("status", ["OPEN", "IN_PROGRESS"])
+      .order("createdAt", { ascending: false })
+      .limit(5),
   ]);
 
-  const revenue = orders.reduce((sum, o) => {
+  const recentOrders = orders.slice(0, 5);
+  const revenue = recentOrders.reduce((sum, o) => {
     const items = JSON.parse(o.items) as { quantity: number; unitPrice?: number }[];
     return sum + items.reduce((s, i) => s + (i.unitPrice || 0) * i.quantity, 0);
   }, 0);
 
+  const ticketUserIds = [...new Set((tickets || []).map((t) => t.userId))];
+  const { data: ticketUsers } = await supabase.from("User").select("id, name").in("id", ticketUserIds);
+  const ticketUserMap = new Map((ticketUsers || []).map((u) => [u.id, u]));
+
   const stats = [
-    { label: "Total Orders", value: orderCount.toString() },
+    { label: "Total Orders", value: String(orderCount || 0) },
     { label: "Revenue (sample)", value: formatCurrency(revenue) },
-    { label: "Active Clients", value: clientCount.toString() },
-    { label: "Products", value: productCount.toString() },
-    { label: "Open Tickets", value: ticketCount.toString() },
+    { label: "Active Clients", value: String(clientCount || 0) },
+    { label: "Products", value: String(productCount || 0) },
+    { label: "Open Tickets", value: String(ticketCount || 0) },
   ];
 
   return (
@@ -61,14 +77,14 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o) => (
+                {recentOrders.map((o) => (
                   <tr key={o.id}>
                     <td>
                       <Link href={`/orders/${o.id}`} className="text-[#1e3a5f] hover:underline font-medium">
                         {o.orderNumber}
                       </Link>
                     </td>
-                    <td>{o.user.name}</td>
+                    <td>{o.user?.name}</td>
                     <td>
                       <Badge variant="navy">{o.status.replace(/_/g, " ")}</Badge>
                     </td>
@@ -91,10 +107,10 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {tickets.map((t) => (
+                {(tickets || []).map((t) => (
                   <tr key={t.id}>
                     <td className="font-medium">{t.ticketNumber}</td>
-                    <td>{t.user.name}</td>
+                    <td>{ticketUserMap.get(t.userId)?.name}</td>
                     <td>
                       <Badge variant="warning">{t.status.replace(/_/g, " ")}</Badge>
                     </td>

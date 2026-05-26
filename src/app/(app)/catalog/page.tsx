@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getProductsWithRelations } from "@/lib/queries";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -8,12 +8,7 @@ import { Package } from "lucide-react";
 
 export default async function CatalogPage() {
   const session = await getSession();
-  const products = await prisma.product.findMany({
-    where: { active: true },
-    include: { countryPrices: true, documents: true },
-    orderBy: { name: "asc" },
-  });
-
+  const products = await getProductsWithRelations(true);
   const country = session?.country || "US";
 
   return (
@@ -28,7 +23,7 @@ export default async function CatalogPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {products.map((product) => {
-          const price = product.countryPrices.find((p) => p.country === country)
+          const price = product.countryPrices.find((p: { country: string; price: number; currency: string }) => p.country === country)
             ?? product.countryPrices[0];
           const colors = parseJsonArray<string>(product.colors);
 
