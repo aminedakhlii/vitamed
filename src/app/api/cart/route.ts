@@ -73,6 +73,32 @@ export async function POST(request: Request) {
   }
 }
 
+const patchSchema = z.object({
+  id: z.string(),
+  quantity: z.number().int().min(1),
+});
+
+export async function PATCH(request: Request) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const { id, quantity } = patchSchema.parse(await request.json());
+    const { data, error } = await getSupabase()
+      .from("CartItem")
+      .update({ quantity })
+      .eq("id", id)
+      .eq("userId", session.id)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+}
+
 export async function DELETE(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

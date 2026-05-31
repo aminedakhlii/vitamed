@@ -38,12 +38,12 @@ export default async function SalesDashboardPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Sales Dashboard</h1>
-        <p className="text-slate-500 mt-1">Quotations, follow-ups, and client activity</p>
+        <p className="text-slate-500 mt-1">Proposals, follow-ups, and client activity</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Pending Quotations", value: pendingQuotes || 0 },
+          { label: "Pending Proposals", value: pendingQuotes || 0 },
           { label: "My Follow-ups", value: followUps || 0 },
           { label: "Open Tickets", value: tickets || 0 },
           { label: "AI Automations", value: automatedFollowUps?.length || 0 },

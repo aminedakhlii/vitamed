@@ -15,7 +15,7 @@ export default async function ClientDashboardPage() {
   const supabase = getSupabase();
   const orders = (await getOrdersWithUsers(session.id)).slice(0, 3);
 
-  const { data: quotations } = await supabase
+  const { data: proposals } = await supabase
     .from("Quotation")
     .select("*")
     .eq("userId", session.id)
@@ -37,14 +37,14 @@ export default async function ClientDashboardPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Welcome, {session.name}</h1>
-        <p className="text-slate-500 mt-1">Your orders, quotations, and account activity</p>
+        <p className="text-slate-500 mt-1">Your orders, proposals, and account activity</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { label: "Active Orders", value: orders.length },
           { label: "Cart Items", value: cartCount || 0 },
-          { label: "Quotations", value: quotations?.length || 0 },
+          { label: "Proposals", value: proposals?.length || 0 },
           { label: "Unread Notifications", value: unreadNotifs || 0 },
         ].map((s) => (
           <div key={s.label} className="stat-card">

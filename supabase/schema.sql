@@ -73,6 +73,8 @@ create table if not exists "Quotation" (
   notes text,
   incoterm text,
   country text,
+  "salesMessage" text,
+  "respondedAt" timestamptz,
   "createdAt" timestamptz not null default now(),
   "updatedAt" timestamptz not null default now()
 );
