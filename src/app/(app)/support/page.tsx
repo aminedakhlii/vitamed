@@ -42,22 +42,15 @@ export default async function SupportPage() {
     order: t.orderId ? (orderMap.get(t.orderId) ?? null) : null,
   }));
 
-  // For ticket form: clients see their own orders; sales see all orders
-  let formOrders: { id: string; orderNumber: string }[] = [];
+  // For client ticket form: load their orders
+  let clientOrders: { id: string; orderNumber: string }[] = [];
   if (isClient) {
     const { data } = await supabase
       .from("Order")
       .select("id, orderNumber")
       .eq("userId", session!.id)
       .order("createdAt", { ascending: false });
-    formOrders = data || [];
-  } else if (isStaff) {
-    const { data } = await supabase
-      .from("Order")
-      .select("id, orderNumber")
-      .order("createdAt", { ascending: false })
-      .limit(100);
-    formOrders = data || [];
+    clientOrders = data || [];
   }
 
   return (
@@ -66,33 +59,44 @@ export default async function SupportPage() {
         <h1 className="text-2xl font-bold text-slate-900">After-Sales Support</h1>
         <p className="text-slate-500 mt-1">
           {isStaff
-            ? "Manage client tickets — accept, resolve, and track issues"
+            ? "Review and manage client support tickets — click a ticket number to open it"
             : "Submit complaints, returns, and track ticket resolution"}
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Ticket form — visible to clients AND sales */}
-        <Card>
-          <CardHeader title="New Support Ticket" />
-          <CardBody>
-            <TicketForm orders={formOrders} />
-          </CardBody>
-        </Card>
-
-        <div className="lg:col-span-2">
+      {isClient ? (
+        <div className="grid lg:grid-cols-3 gap-6">
           <Card>
-            <CardHeader title={`Tickets (${enriched.length})`} />
-            <CardBody className="p-0">
-              <TicketTable
-                initial={enriched}
-                isStaff={!!isStaff}
-                currentUserId={session?.id ?? ""}
-              />
+            <CardHeader title="New Support Ticket" />
+            <CardBody>
+              <TicketForm orders={clientOrders} />
             </CardBody>
           </Card>
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader title={`My Tickets (${enriched.length})`} />
+              <CardBody className="p-0">
+                <TicketTable
+                  initial={enriched}
+                  isStaff={false}
+                  currentUserId={session?.id ?? ""}
+                />
+              </CardBody>
+            </Card>
+          </div>
         </div>
-      </div>
+      ) : (
+        <Card>
+          <CardHeader title={`All Tickets (${enriched.length})`} />
+          <CardBody className="p-0">
+            <TicketTable
+              initial={enriched}
+              isStaff={!!isStaff}
+              currentUserId={session?.id ?? ""}
+            />
+          </CardBody>
+        </Card>
+      )}
     </div>
   );
 }

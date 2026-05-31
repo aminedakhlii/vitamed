@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { UserCheck, CheckCircle, XCircle } from "lucide-react";
@@ -89,7 +90,14 @@ export function TicketTable({
           const isLoading = busy === t.id;
           return (
             <tr key={t.id}>
-              <td className="font-medium">{t.ticketNumber}</td>
+              <td>
+                <Link
+                  href={`/support/${t.id}`}
+                  className="font-medium text-[#1e3a5f] hover:underline"
+                >
+                  {t.ticketNumber}
+                </Link>
+              </td>
               {isStaff && (
                 <td>{t.user?.company || t.user?.name || "—"}</td>
               )}
