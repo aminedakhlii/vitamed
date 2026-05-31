@@ -75,17 +75,19 @@ export async function POST(request: Request) {
     for (const u of salesUsers || []) {
       await createNotification(
         u.id,
-        "New Quotation Request",
-        `${session.name} submitted a quotation request.`,
-        "ORDER"
+        "New Proposal",
+        `${session.name} submitted a pricing proposal.`,
+        "ORDER",
+        "/proposals"
       );
     }
 
     await createNotification(
       session.id,
-      "Quotation Submitted",
-      "Your quotation request has been received. Our team will respond shortly.",
-      "ORDER"
+      "Proposal Submitted",
+      "Your proposal has been received. Our sales team will review and respond shortly.",
+      "ORDER",
+      "/proposals"
     );
 
     return NextResponse.json(quotation);

@@ -77,7 +77,8 @@ export async function POST(request: Request) {
         u.id,
         "Order Confirmed",
         `${session.name} confirmed order ${orderNumber} from an approved proposal.`,
-        "ORDER"
+        "ORDER",
+        `/orders/${order.id}`
       );
     }
 

@@ -119,7 +119,8 @@ export async function createNotification(
   userId: string,
   title: string,
   message: string,
-  type: NotificationType = "SYSTEM"
+  type: NotificationType = "SYSTEM",
+  link?: string
 ) {
   const { data, error } = await createAdminClient()
     .from("Notification")
@@ -130,6 +131,7 @@ export async function createNotification(
       message,
       type,
       read: false,
+      link: link ?? null,
       createdAt: new Date().toISOString(),
     })
     .select()

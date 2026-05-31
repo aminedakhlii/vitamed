@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
 
 type Notification = {
   id: string;
@@ -12,6 +13,7 @@ type Notification = {
   message: string;
   type: string;
   read: boolean;
+  link: string | null;
   createdAt: string;
 };
 
@@ -26,6 +28,16 @@ export function NotificationList({ initial }: { initial: Notification[] }) {
       body: JSON.stringify({ id }),
     });
     setNotifications((n) => n.map((x) => (x.id === id ? { ...x, read: true } : x)));
+  }
+
+  async function handleClick(n: Notification) {
+    if (!n.read) {
+      await markRead(n.id);
+      router.refresh();
+    }
+    if (n.link) {
+      router.push(n.link);
+    }
   }
 
   async function markAllRead() {
@@ -47,6 +59,15 @@ export function NotificationList({ initial }: { initial: Notification[] }) {
     SYSTEM: "default",
   };
 
+  const typeLabel: Record<string, string> = {
+    ORDER: "Order",
+    SHIPPING: "Shipping",
+    PAYMENT: "Payment",
+    COMPLAINT: "Support",
+    FOLLOW_UP: "Follow-up",
+    SYSTEM: "System",
+  };
+
   return (
     <div>
       <div className="flex justify-end mb-4">
@@ -55,29 +76,48 @@ export function NotificationList({ initial }: { initial: Notification[] }) {
         </Button>
       </div>
       <div className="space-y-3">
-        {notifications.map((n) => (
-          <div
-            key={n.id}
-            className={`p-4 border rounded-lg ${n.read ? "border-slate-100 bg-white" : "border-[#1e3a5f]/20 bg-blue-50/30"}`}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-slate-900">{n.title}</p>
-                  <Badge variant={typeVariant[n.type] || "default"}>{n.type}</Badge>
-                  {!n.read && <Badge variant="info">New</Badge>}
+        {notifications.map((n) => {
+          const clickable = !!n.link;
+          return (
+            <div
+              key={n.id}
+              onClick={() => handleClick(n)}
+              className={`p-4 border rounded-lg transition-colors ${
+                n.read
+                  ? "border-slate-100 bg-white"
+                  : "border-[#1e3a5f]/20 bg-blue-50/30"
+              } ${clickable ? "cursor-pointer hover:border-[#1e3a5f]/40 hover:bg-blue-50/50" : ""}`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-slate-900">{n.title}</p>
+                    <Badge variant={typeVariant[n.type] || "default"}>
+                      {typeLabel[n.type] || n.type}
+                    </Badge>
+                    {!n.read && <Badge variant="info">New</Badge>}
+                  </div>
+                  <p className="text-sm text-slate-600 mt-1">{n.message}</p>
+                  <p className="text-xs text-slate-400 mt-1">{formatDate(n.createdAt)}</p>
                 </div>
-                <p className="text-sm text-slate-600 mt-1">{n.message}</p>
-                <p className="text-xs text-slate-400 mt-1">{formatDate(n.createdAt)}</p>
+                <div className="flex items-center gap-2 shrink-0">
+                  {!n.read && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); markRead(n.id); }}
+                    >
+                      Mark read
+                    </Button>
+                  )}
+                  {clickable && (
+                    <ArrowRight className="w-4 h-4 text-slate-400" />
+                  )}
+                </div>
               </div>
-              {!n.read && (
-                <Button variant="ghost" size="sm" onClick={() => markRead(n.id)}>
-                  Mark read
-                </Button>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

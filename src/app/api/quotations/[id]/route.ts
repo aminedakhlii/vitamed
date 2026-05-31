@@ -45,7 +45,8 @@ export async function PATCH(
       proposal.userId,
       action === "APPROVE" ? "Proposal Approved ✓" : "Proposal Requires Revision",
       message,
-      "ORDER"
+      "ORDER",
+      "/proposals"
     );
 
     return NextResponse.json(proposal);

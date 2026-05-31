@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     const { data: staff } = await supabase.from("User").select("id").in("role", ["SALES", "ADMIN"]);
     for (const u of staff || []) {
-      await createNotification(u.id, "New Support Ticket", `${session.name}: ${data.subject}`, "COMPLAINT");
+      await createNotification(u.id, "New Support Ticket", `${session.name}: ${data.subject}`, "COMPLAINT", "/support");
     }
 
     return NextResponse.json(ticket);

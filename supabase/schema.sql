@@ -110,6 +110,7 @@ create table if not exists "Notification" (
   message text not null,
   type text not null default 'SYSTEM',
   read boolean not null default false,
+  link text,
   "createdAt" timestamptz not null default now()
 );
 

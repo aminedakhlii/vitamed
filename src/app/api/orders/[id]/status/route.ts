@@ -58,7 +58,8 @@ export async function PATCH(
       order.userId,
       "Order Status Updated",
       `Order ${order.orderNumber} is now: ${status.replace(/_/g, " ")}${note ? ` — ${note}` : ""}`,
-      type
+      type,
+      `/orders/${id}`
     );
 
     return NextResponse.json(order);
