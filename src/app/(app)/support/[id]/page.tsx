@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TicketActions } from "@/components/support/ticket-actions";
+import { TicketNotes } from "@/components/support/ticket-notes";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 
@@ -91,6 +92,22 @@ export default async function TicketDetailPage({
               </p>
             </CardBody>
           </Card>
+
+          {/* Staff-only: internal notes */}
+          {isStaff && (
+            <Card>
+              <CardHeader
+                title="Internal Notes"
+                description="Visible only to sales and admin — not shown to the client"
+              />
+              <CardBody>
+                <TicketNotes
+                  ticketId={ticket.id}
+                  initialNotes={ticket.notes ?? null}
+                />
+              </CardBody>
+            </Card>
+          )}
 
           {/* Staff actions */}
           {isStaff && (

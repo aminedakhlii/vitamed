@@ -120,6 +120,7 @@ create table if not exists "SupportTicket" (
   "userId" text not null references "User"(id) on delete cascade,
   "assignedToId" text references "User"(id) on delete set null,
   "orderId" text references "Order"(id) on delete set null,
+  notes text,
   type text not null,
   subject text not null,
   description text not null,
