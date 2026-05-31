@@ -27,21 +27,23 @@ export async function GET() {
   );
 }
 
+const nullableStr = z.string().nullable().optional().transform((v) => v ?? undefined);
+
 const createSchema = z.object({
   items: z.array(
     z.object({
       productId: z.string(),
       name: z.string(),
       quantity: z.number(),
-      unitPrice: z.number().optional(),
-      color: z.string().optional(),
-      size: z.string().optional(),
-      packaging: z.string().optional(),
+      unitPrice: z.number().nullable().optional(),
+      color: nullableStr,
+      size: nullableStr,
+      packaging: nullableStr,
     })
   ),
-  notes: z.string().optional(),
-  incoterm: z.string().optional(),
-  country: z.string().optional(),
+  notes: nullableStr,
+  incoterm: nullableStr,
+  country: nullableStr,
 });
 
 export async function POST(request: Request) {
@@ -64,7 +66,10 @@ export async function POST(request: Request) {
     };
 
     const { error } = await getSupabase().from("Quotation").insert(quotation);
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) {
+      console.error("[api:quotations] insert error:", error.message, "userId:", session.id);
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
 
     const { data: salesUsers } = await getSupabase().from("User").select("id").eq("role", "SALES");
     for (const u of salesUsers || []) {
@@ -84,7 +89,8 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json(quotation);
-  } catch {
+  } catch (err) {
+    console.error("[api:quotations] validation/unexpected error:", err);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 }

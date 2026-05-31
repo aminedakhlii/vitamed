@@ -73,7 +73,7 @@ export async function POST(request: Request) {
       .insert({
         id: authUser.id,
         email: authUser.email ?? email,
-        passwordHash: null,
+        passwordHash: "SUPABASE_AUTH",
         name: (meta.name as string) || (authUser.email ?? email).split("@")[0],
         role: (meta.role as Role) || "CLIENT",
         company: (meta.company as string) ?? null,
