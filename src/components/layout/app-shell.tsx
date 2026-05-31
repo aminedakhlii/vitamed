@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
+import { getSupabase } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { SupabaseAuthListener } from "@/components/supabase-auth-listener";
@@ -15,10 +16,16 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     redirect("/login");
   }
 
+  const { count: unreadCount } = await getSupabase()
+    .from("Notification")
+    .select("*", { count: "exact", head: true })
+    .eq("userId", session.id)
+    .eq("read", false);
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       <SupabaseAuthListener />
-      <Sidebar role={session.role} userName={session.name} />
+      <Sidebar role={session.role} userName={session.name} unreadNotifications={unreadCount ?? 0} />
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
           <div />

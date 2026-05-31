@@ -163,7 +163,7 @@ export function ProposalRow({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setResponding(true)}
+              onClick={() => { setResponding(true); setExpanded(true); }}
               className="text-slate-700"
             >
               Respond

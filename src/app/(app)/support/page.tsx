@@ -18,8 +18,29 @@ export default async function SupportPage() {
     userIds.add(t.userId);
     if (t.assignedToId) userIds.add(t.assignedToId);
   }
-  const { data: users } = await supabase.from("User").select("id, name, company").in("id", [...userIds]);
+  const { data: users } = await supabase
+    .from("User")
+    .select("id, name, company")
+    .in("id", [...userIds]);
   const userMap = new Map((users || []).map((u) => [u.id, u]));
+
+  // Load order labels for linked tickets
+  const orderIds = [...new Set((tickets || []).map((t) => t.orderId).filter(Boolean))];
+  const { data: orders } = orderIds.length
+    ? await supabase.from("Order").select("id, orderNumber").in("id", orderIds)
+    : { data: [] };
+  const orderMap = new Map((orders || []).map((o) => [o.id, o]));
+
+  // For clients: load their orders for the new-ticket form
+  let clientOrders: { id: string; orderNumber: string }[] = [];
+  if (session?.role === "CLIENT") {
+    const { data: myOrders } = await supabase
+      .from("Order")
+      .select("id, orderNumber")
+      .eq("userId", session.id)
+      .order("createdAt", { ascending: false });
+    clientOrders = myOrders || [];
+  }
 
   const statusVariant: Record<string, "default" | "warning" | "success" | "danger" | "info"> = {
     OPEN: "warning",
@@ -40,7 +61,7 @@ export default async function SupportPage() {
           <Card>
             <CardHeader title="New Support Ticket" />
             <CardBody>
-              <TicketForm />
+              <TicketForm orders={clientOrders} />
             </CardBody>
           </Card>
         )}
@@ -56,6 +77,7 @@ export default async function SupportPage() {
                     {session?.role !== "CLIENT" && <th>Client</th>}
                     <th>Type</th>
                     <th>Subject</th>
+                    <th>Order</th>
                     <th>Status</th>
                     <th>Assigned</th>
                     <th>Date</th>
@@ -72,6 +94,15 @@ export default async function SupportPage() {
                         <Badge variant="default">{t.type}</Badge>
                       </td>
                       <td>{t.subject}</td>
+                      <td>
+                        {t.orderId && orderMap.get(t.orderId) ? (
+                          <span className="font-mono text-xs text-[#1e3a5f]">
+                            {orderMap.get(t.orderId)!.orderNumber}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
                       <td>
                         <Badge variant={statusVariant[t.status] || "default"}>
                           {t.status.replace(/_/g, " ")}

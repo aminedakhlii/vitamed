@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ProductForm } from "@/components/products/product-form";
 import { productToFormDefaults } from "@/lib/product-form";
+import { ProductDocuments } from "@/components/products/product-documents";
 import Link from "next/link";
 
 export default async function EditProductPage({
@@ -35,12 +36,22 @@ export default async function EditProductPage({
           {product.code} — {product.name}
         </p>
       </div>
-      <Card>
-        <CardHeader title="Product details" />
-        <CardBody>
-          <ProductForm initial={initial} mode="edit" />
-        </CardBody>
-      </Card>
+
+      <div className="space-y-6">
+        <Card>
+          <CardHeader title="Product details" />
+          <CardBody>
+            <ProductForm initial={initial} mode="edit" />
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader title="Documents & Attachments" />
+          <CardBody>
+            <ProductDocuments productId={product.id} initialDocs={product.documents} />
+          </CardBody>
+        </Card>
+      </div>
     </div>
   );
 }

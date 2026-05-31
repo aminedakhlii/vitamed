@@ -39,6 +39,7 @@ const createSchema = z.object({
   type: z.enum(["COMPLAINT", "RETURN", "REPLACEMENT", "FEEDBACK"]),
   subject: z.string().min(3),
   description: z.string().min(10),
+  orderId: z.string().nullable().optional(),
 });
 
 export async function POST(request: Request) {
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
       ticketNumber,
       userId: session.id,
       assignedToId: null,
+      orderId: data.orderId ?? null,
       type: data.type,
       subject: data.subject,
       description: data.description,

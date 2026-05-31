@@ -58,7 +58,15 @@ const navByRole: Record<Role, NavItem[]> = {
   ],
 };
 
-export function Sidebar({ role, userName }: { role: Role; userName: string }) {
+export function Sidebar({
+  role,
+  userName,
+  unreadNotifications = 0,
+}: {
+  role: Role;
+  userName: string;
+  unreadNotifications?: number;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const items = navByRole[role];
@@ -99,7 +107,12 @@ export function Sidebar({ role, userName }: { role: Role; userName: string }) {
               )}
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.href === "/notifications" && unreadNotifications > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                  {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                </span>
+              )}
             </Link>
           );
         })}
