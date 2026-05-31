@@ -7,9 +7,11 @@ import { Check, Pencil } from "lucide-react";
 export function TicketNotes({
   ticketId,
   initialNotes,
+  readOnly = false,
 }: {
   ticketId: string;
   initialNotes: string | null;
+  readOnly?: boolean;
 }) {
   const [notes, setNotes] = useState(initialNotes ?? "");
   const [editing, setEditing] = useState(false);
@@ -44,6 +46,14 @@ export function TicketNotes({
   function cancel() {
     setDraft(notes);
     setEditing(false);
+  }
+
+  if (readOnly) {
+    return notes ? (
+      <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{notes}</p>
+    ) : (
+      <p className="text-sm text-slate-400 italic">No notes added yet.</p>
+    );
   }
 
   return (

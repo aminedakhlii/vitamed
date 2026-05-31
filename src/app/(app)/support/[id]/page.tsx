@@ -93,21 +93,20 @@ export default async function TicketDetailPage({
             </CardBody>
           </Card>
 
-          {/* Staff-only: internal notes */}
-          {isStaff && (
-            <Card>
-              <CardHeader
-                title="Internal Notes"
-                description="Visible only to sales and admin — not shown to the client"
+          {/* Notes — visible to everyone; editable only by staff */}
+          <Card>
+            <CardHeader
+              title="Notes"
+              description={isStaff ? "Click to edit — visible to the client" : undefined}
+            />
+            <CardBody>
+              <TicketNotes
+                ticketId={ticket.id}
+                initialNotes={ticket.notes ?? null}
+                readOnly={!isStaff}
               />
-              <CardBody>
-                <TicketNotes
-                  ticketId={ticket.id}
-                  initialNotes={ticket.notes ?? null}
-                />
-              </CardBody>
-            </Card>
-          )}
+            </CardBody>
+          </Card>
 
           {/* Staff actions */}
           {isStaff && (
